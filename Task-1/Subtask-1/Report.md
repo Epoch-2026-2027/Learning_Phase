@@ -64,9 +64,79 @@ MLPs, as highlighted earlier, are unable to gauge the order of elements in the s
 ### Stability
 All three models display smooth descent in loss history, but Vanilla RNNs and biLSTMs drop to their loss minimas quickly and wildly start overfitting. The MLP model is able maintain a healthy gap between validation and training loss at the plateau region - signalling that for the architecture, it is generalising well and not overfitting. Same cannot be said about the other two models... 
 
-### Generalization Behavior
-Observe some testing examples from each of the models.
+### Generalization Behavior  
+Observe some testing examples from each of the models.  
 1. MLP model  
-&emsp;&emsp;&emsp;&emsp;Sequence-->[ 42, 954,  20, 706, 244, 717, 279, 440, 350, 439]  
-&emsp;&emsp;&emsp;&emsp;Predic-->   [0, 7, 0, 7, 2, 7, 3, 5, 4, 5]   
-&emsp;&emsp;&emsp;&emsp;Actual-->   [1, 9, 0, 7, 2, 8, 3, 6, 4, 5]  
+&emsp;&emsp;&emsp;&emsp;Sequence   --> [ 42, 954,  20, 706, 244, 717, 279, 440, 350, 439]  
+&emsp;&emsp;&emsp;&emsp;Predicted-->   [0, 7, 0, 7, 2, 7, 3, 5, 4, 5]   
+&emsp;&emsp;&emsp;&emsp;Actual   -->   &emsp;[1, 9, 0, 7, 2, 8, 3, 6, 4, 5]  
+`Number of matches = 6`, The model does a decent job - it gets 5/10 of the ranks right. But it repeats ranks - notices how it directly assigns lower ranks to smaller numbers, and higher ranks for much larger numbers? `rank 0` for `42` and `20`, while it gives rank 7 for `954`, `706`, `717`? Simply because it doesn't see the numbers as a sequence, but as an indpendent collection. It's almost vaguely ranking the numbers into ranks based on all 1000 numbers in the vocabulary!  
+
+2. Vanilla RNN Model  
+&emsp;&emsp;&emsp;&emsp;Sequence   --> [ 24, 969, 186,  25, 551, 613, 792, 247, 262, 856]  
+&emsp;&emsp;&emsp;&emsp;Predicted-->   [0, 9, 1, 3, 5, 5, 8, 6, 4, 6]  
+&emsp;&emsp;&emsp;&emsp;Actual   -->   &emsp;[0, 9, 2, 1, 5, 6, 7, 3, 4, 8]  
+`Number of matches = 4`, Again it is doing something similar to what the MLP model did - repeating ranks, and <i>attempting</i> broad statistics, like `rank 0` for `24`, `rank 8` for 792, `rank 9` for 969, but it also gets confused because of the partial sequential data it remembers, like how it gives `rank 4` and `rank 6` for `262` and `856` - Neither capturing global stastics in the vocabulary like the MLP, neither capturing global sequence information, thus performing even worse than the MLP model!  
+
+3. biLSTM Model  
+&emsp;&emsp;&emsp;&emsp;Sequence   --> [524, 825,  88, 616, 266, 641, 380, 992,  11, 163]   
+&emsp;&emsp;&emsp;&emsp;Predicted-->   [5, 8, 1, 6, 2, 6, 4, 9, 0, 2]  
+&emsp;&emsp;&emsp;&emsp;Actual   -->   &emsp;[5, 8, 1, 6, 3, 7, 4, 9, 0, 2]  
+`Number of matches = 8`, This model is able to actually process sequential information without forgetting it. It's only fault is that in this example, it repeated `rank 2` and `rank 6` twice - but it can just be a fault in the training, since the actual values are pretty close (`rank 3` and `rank 7`).  
+
+### Varying Sequence Length
+Now let's observe what happens to the baseline models from a sequence length of 4 to 10, instead of just the current 10. Do these models perform better in smaller sequences? If yes, this is a severe bottleneck.
+<table>
+<tr>
+<td>
+
+**Testing Loss**
+
+| Model | seq=4 | seq=6 | seq=8 | seq=10 |
+|:------|:-----:|:-----:|:-----:|:------:|
+| MLP | 0.404 | 0.746 | 1.095 | 1.354 |
+| Vanilla RNN | 0.662 | 1.050 | 1.337 | 1.566 |
+| biLSTM | 0.251 | 0.594 | 0.666 | 0.913 |
+
+</td>
+<td>
+
+**Average Matches**
+
+| Model | seq=4 | seq=6 | seq=8 | seq=10 |
+|:------|:-----:|:-----:|:-----:|:------:|
+| MLP | 3.860 | 4.359 | 4.829 | 4.849 |
+| Vanilla RNN | 2.755 | 3.166 | 3.387 | 3.536 |
+| biLSTM | 3.633 | 4.430 | 5.717 | 6.057 |
+
+</td>
+</tr>
+</table>
+Oof. This is a shortcoming of all the baseline models.  
+In Vanilla RNN, it is able to get 2.755/4 position ranks correct on average, but as we increase it to 10, it hits a ceiling of 3.536/10 correct position ranks.  
+In MLP, from 3.86/4 to 4.85/10 correct position ranks, and in biLSTMs, from 3.63/4 to 6.057/10.  
+Especially for the RNN/LSTM models, this doesn't seem very prospective to use them, considering they are more expensive to train. Speaking of which...
+
+### Computational Cost
+We can gauge this by just recalling the computational complexities of the three models.
+| Model | Complexity |
+|:------|:----------:|
+| MLP | $O(ih + hk)$ |
+| Vanilla RNN | $O(ih + h^2 + hk)$ |
+| biLSTM | $O(ih + h^2 + h + hk)$ |
+
+(where i = input size, h = hidden size, k = output size)
+In this regard for even a well-optimized system of models, MLP > Vanilla RNN > biLSTM in terms of training efficiency.
+
+## Transformer Encoders - A brief analysis
+Moving onto the main model of importance - a Transformer Encoder, a model that utilizes self-attention to make sense of the data.
+Let us first look at its training and performance on the 10-elements long sequence data set.
+Given below is the loss history...  
+<img width="300" height="250" alt="10_bert_loss" src="https://github.com/user-attachments/assets/505b2e15-0885-44a3-924b-d1f51898e5e8" />  
+With a `Testing loss of 0.903` and an `Average match of 8.586`. It is a much slower to converge model, and requires much for regularisation than the others due to its complexity relative to the sub-task. Nonetheless, it generalises better than even the biLSTM. Infact, it is even able to perfectly predict a significant number of sequences in inference. For example,  
+&emsp;&emsp;&emsp;&emsp;Sequence   --> [511, 896,  95, 259, 304, 440, 782, 708, 156, 661]    
+&emsp;&emsp;&emsp;&emsp;Predicted-->   [5, 9, 0, 2, 3, 4, 8, 7, 1, 6]    
+&emsp;&emsp;&emsp;&emsp;Actual   -->   &emsp;[5, 9, 0, 2, 3, 4, 8, 7, 1, 6]  
+
+It is able to do this because of the bidirectional Self-Attention mechanism baked into it. It is able to attend to every other taken with respect to a token, and compare everything globally. 
+
