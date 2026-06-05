@@ -140,3 +140,5 @@ With a `Testing loss of 0.903` and an `Average match of 8.586`. It is a much slo
 
 It is able to do this because of the bidirectional Self-Attention mechanism baked into it. It is able to attend to every other taken with respect to a token, and compare everything globally. 
 
+Let's observe how the model attends to each token, using the `bertviz` library's `head_view()` function.
+<img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/4013b994-f4e1-4a08-a5b5-cffc692cf45d" />
