@@ -178,7 +178,7 @@ Now moving onto my ablation studies. They will be divided into two segments-
 * Data Representation ablations - checking the usability of different modes of representing the sequences with a particular baseline model.
 * Architecture & Attention ablations - direct comparisons of baselines and self attention model, self attention model and variating architecture / hyper parameters. 
 
-### Data-Representation  
+### Ablation-A : Data-Representation  
 I will be using the biLSTM baseline with a `sequence length=6`, and an optimizer `AdamW(lr=1e-3,weight_decay=1e-3,betas=(0.9,0.99)))`.  
   
 #### Sequence Normalization  
@@ -202,7 +202,7 @@ We will be exploring three normalisation strategies-
   </tr>
 </table>  
 
-* <b>Training stability</b> - No normalisation offers a rough training, plateauing chaotically. Z-Normalisation offers the highest training stability of the four options. Global Min-Max scaling offers the worst performance - the model loses all informaation as very tiny values get compressed even more. Sequence-wise Min-Max scaling has a mostly smooth descent, placing it close to the best.  
+* <b>Training stability</b> - No normalisation offers rough descent, plateauing chaotically. Z-Normalisation offers the highest training stability of the four options. Global Min-Max scaling offers the worst performance - the model loses all informaation as very tiny values get compressed even more. Sequence-wise Min-Max scaling has a mostly smooth descent, placing it close to the best.  
   
 * <b>Convergence</b> - No normalisation has chaotic convergence, it gets stuck in a locak gradient and starts over-fitting. Sequence-wise Min-Max scaling and Z-normalisation offer superior results, while Global Min-Max scaling leads to chaos and no proper convergence.  
   
@@ -220,7 +220,95 @@ We will be exploring three normalisation strategies-
   It <i>can</i> be argued that Z-Normalisation and Sequence-wise Min-Max scaling are much better than the other options, as they do seem to rank outliers somewhat   well.  
 
 #### Categorical Embeddings vs Continuous Representations  
+We will be exploring three normalisation strategies-  
+    1. Raw float inputs  
+    2. Normalised float inputs (Z-normalisation)  
+    3. Embedded inputs  
+<table>
+  <tr>
+    <td align="center" width="300">Raw float inputs</td>
+    <td align="center" width="300">Normalised inputs</td>
+    <td align="center" width="300">Embedded inputs Normalisation</td>
+  </tr>
+  <tr>
+    <td><img width="300" height="250" alt="rawnumerical_6_lstm_loss" src="https://github.com/user-attachments/assets/08cf3415-ad09-42be-9052-54a96ae612bf" /></td> 
+    <td><img width="300" height="250" alt="norm1_6_lstm_loss" src="https://github.com/user-attachments/assets/69bbf1d2-3390-4e21-a92f-b9bb1a531993" /></td> 
+    <td><img width="300" height="250" alt="embed_6_lstm_loss" src="https://github.com/user-attachments/assets/6105ea45-1812-4310-a0c2-740519fa6701" /></td> 
+  </tr>
+</table>  
+  
+* <b>Training stability and Convergence</b> - Raw float inputs offer rough descent, and plateaus chaotically. Normalised inputs offer the highest training stability of the three options. Embedded inputs offers the worst performance - smooth descent initially but overfits after hitting a local gradient. This can be because the inputs just don't have enough high dimensional information needed to be represented effectively by embeddings.  
+  
+### Ablation-B : Architecture & Attention  
+####Summarising Baselines vs Transformer  
+* <b>Sequential processing</b> — Vanilla RNN / LSTM process tokens one at a time, naturally suited for short sequences. But as sequence length grows, both struggle — the LSTM hits a ceiling of 6.057/10 matches at seq=10, while the Transformer reaches 8.586/10. This is a consequence of information getting compressed into hidden states and/or cell states. Attention mitigates this.  
+  
+* <b>Long-range reasoning</b> — Vanilla RNNs degrade over long sequences due to vanishing gradients; LSTMs mitigate this with having Input/Output/Forget/Cell_state gates, but still fall short. The BERT" model's bidirectional self-attention attends to all tokens simultaneously, giving it a clear edge as sequence length increases.  
+  
+* <b>Parallelism</b> — Vanilla RNN / LSTM are inherently sequential — each timestep depends on the previous, making them slow to train. Transformers compute all attention scores in parallel, making them significantly faster on hardware like GPUs.  
+  
+* <b>Global context understanding</b> — RNN/LSTM build context incrementally and can lose earlier information. The "BERT" model attends to the entire input at once, which is why it learns pairwise comparisons and global ranking structure — as seen in the attention visualisations previously.
+    
+#### Encoder Depth Experiments  
+For this ablations, I will be using the "BERT" baseline with `batch_size=512`, `BERTModel(N=[1,2,3,4], h=2, dmodel=10, dk=5, dv=5, vocab_size=1000, seq_len=6)`, and an optimizer `AdamW(lr=1e-3,weight_decay=1e-3,betas=(0.9,0.99)))`.  
+<table>
+  <tr>
+    <td align="center" width="300">N=1</td>
+    <td align="center" width="300">N=2</td>
+    <td align="center" width="300">N=3</td>
+    <td align="center" width="300">N=4</td>
+  </tr>
+  <tr>
+    <td><img width="300" height="250" alt="N1_6_bert_loss" src="https://github.com/user-attachments/assets/bbc24c2c-4e5e-4b29-8fae-764e5c1e45bc" /></td> 
+    <td><img width="300" height="250" alt="N2_6_bert_loss" src="https://github.com/user-attachments/assets/fbed3b65-850e-49cf-ae38-3faf1ccb8295" /></td> 
+    <td><img width="300" height="250" alt="N3_6_bert_loss" src="https://github.com/user-attachments/assets/8e9bf78f-c855-42fa-9dcf-b6d408e1d92f" /></td>
+    <td><img width="300" height="250" alt="N4_6_bert_loss" src="https://github.com/user-attachments/assets/e2fa6db6-b502-43e9-b44a-ef0952ece051" /></td>
+  </tr>
+</table>  
+  
+From the loss histories, it becomes clear that `N=3` is the optimum value! `N=4` and onwards may lean towards overfitting, while `N=1` and `N=2` may be examples of underfitting - the model hasn't learned any of the underlying trends.  
+The testing statistics are as follows...  
+| N (Encoder Layers) | Testing Loss | Avg Matches |
+|:------------------:|:------------:|:-----------:|
+| 1 | 0.940 | 3.681 |
+| 2 | 0.940 | 3.534 |
+| 3 | 0.891 | 3.849 |
+| 4 | 0.872 | 3.833 |  
+`N=3` performs the best. Note we can account for the low Avg Matches (<3.85/6) simply because the task is below the model's capacity. It achieved a much higher match accuracy when `seq_len=10`. 
 
+For reference, here are the attentiom visualisations for the various N values, for the input `[305, 142, 822, 572, 293, 263]`.  
+  
+* N=1  (Prediction -> `[3, 0, 4, 4, 2, 2]`)  
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/adea9aa1-9804-4d9d-ba0b-e1803ecd8dce" />  
+  
+* N=2  (Prediction -> `[2, 1, 4, 4, 2, 2]`)  
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/44aa597e-4167-4b8d-afaf-211eae9330a5" />
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/285a63b1-2e6c-4f07-8f98-2e5887dada60" />  
+  
+* N=3  (Prediction -> `[3, 0, 4, 4, 2, 1]`)  
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/9073fe93-2528-4c00-9846-fe68b7f792c3" />
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/ae1f0fb8-954c-4528-8e17-b5f0ecdb0825" />
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/63f77e7d-d4cb-42de-a975-777102a407ab" />  
+  
+* N=4  (Prediction -> `[2, 1, 4, 4, 1, 2]`)  
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/86fb9ae0-b822-4d1c-b493-08c404636823" />
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/4589ebec-cb4e-44a4-9d55-21963c0ecaa7" />
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/d262d607-b20b-4e1e-bcfe-8873b2ad74f9" />
+<img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/d827e562-fd00-427c-b806-adab64ba4332" />  
+  
+r
+
+
+
+
+
+
+
+
+
+  
+### Positional Encoding Ablation  
+For this ablations, I will be using the "BERT" baseline with `batch_size=512`, `BERTModel(N=3, h=2, dmodel=10, dk=5, dv=5, vocab_size=1000, seq_len=10)`, and an optimizer `AdamW(lr=1e-3,weight_decay=1e-3,betas=(0.9,0.99)))`
 
 
 
