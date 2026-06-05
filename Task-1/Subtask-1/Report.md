@@ -4,7 +4,7 @@ This report contains information about my attempts at implementing the Transform
 I have also chosen this sub-task for performing my ablations and analysing the model's behaviours with respect to many parameters/architecture motivations.
 
 ## LLM usage
-I have commented next to LLM-generated code lines specifically in the source files. LLMs were used to understand concepts like  An LLM was used to generate the diagrams given below. 
+I have commented next to LLM-generated code lines specifically in the source files. LLMs were used to debug CUDA errors and other operational faults. An LLM was used to generate the diagrams and table structures used across, but not the values in them. 
 
 ## Methodology
 I decided to make three baselines-
@@ -35,7 +35,7 @@ With that being said, the baseline parameters of each model for the initial eval
 * <b>MLP</b> (`vocab_size=1000`, `sequence_lengths=[4,6,8,10]`, `embed_dim=5`)   
 * <b>Vanilla RNN</b> (`vocab_size=1000`, `sequence_lengths=[4,6,8,10]`, `embed_dim=5`, `layer=1`, `bidirectional=False`)
 * <b>biLSTM</b> (`vocab_size=1000`, `sequence_lengths=[4,6,8,10]`, `embed_dim=5`, `layer=1`, `bidirectional=True`)
-* <b>BERT</b> (`N=3`, `heads=2`, `dmodel=10`, `dk=5`, `dv=5`, `vocab_size=1000`, `sequence_lengths=[4,6,8,10]`)  
+* <b>BERT</b> (`N=3`, `heads=2`, `dmodel=10`, `dk=5`, `dv=5`, `vocab_size=1000`, `sequence_lengths=[4,6,8,10]`) (with Xavier initialisation)
 
 with an AdamW optimizer (`lr=1e-3`, `weight_decay=1e-3`, `betas=(0.9,0.99)`), and a batch_size=256. Training-Validation-Test split of 80-10-10. Also, I will let the `maximum number of epochs` be `2000`. All them will be tested with embeddings initially (which also means no normalisation), with more work done in ablations.  
 For testing metrics, I will be using `CrossEntropyLoss` and `Element-wise Matches`.
