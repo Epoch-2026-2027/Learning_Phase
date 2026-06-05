@@ -37,7 +37,7 @@ With that being said, the baseline parameters of each model for the initial eval
 * <b>biLSTM</b> (`vocab_size=1000`, `sequence_lengths=[4,6,8,10]`, `embed_dim=5`, `layer=1`, `bidirectional=True`)
 * <b>BERT</b> (`N=3`, `heads=2`, `dmodel=10`, `dk=5`, `dv=5`, `vocab_size=1000`, `sequence_lengths=[4,6,8,10]`)  
 
-with an AdamW optimizer (`lr=1e-3`, `weight_decay=1e-3`, `betas=(0.9,0.99)`), and a batch_size=256. Also, I will let the `maximum number of epochs` be `2000`. All them will be tested with embeddings initially (which also means no normalisation), with more work done in ablations.  
+with an AdamW optimizer (`lr=1e-3`, `weight_decay=1e-3`, `betas=(0.9,0.99)`), and a batch_size=256. Training-Validation-Test split of 80-10-10. Also, I will let the `maximum number of epochs` be `2000`. All them will be tested with embeddings initially (which also means no normalisation), with more work done in ablations.  
 For testing metrics, I will be using `CrossEntropyLoss` and `Element-wise Matches`.
 
 ## Baseline Analysis
@@ -140,5 +140,23 @@ With a `Testing loss of 0.903` and an `Average match of 8.586`. It is a much slo
 
 It is able to do this because of the bidirectional Self-Attention mechanism baked into it. It is able to attend to every other taken with respect to a token, and compare everything globally. 
 
-Let's observe how the model attends to each token, using the `bertviz` library's `head_view()` function.
-<img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/4013b994-f4e1-4a08-a5b5-cffc692cf45d" />
+Let's observe how the model attends to each token, using the `bertviz` library's `head_view()` function.  
+<img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/4013b994-f4e1-4a08-a5b5-cffc692cf45d" />  
+This is the attention visualisation for all tokens to eachother. The two colours represent the attention from each of the two heads.  
+We shall observe some examples and see what emergent properties have arisen.
+* Layer 0 - The heads haven't really learned anything consistent. Some tokens attend to adjacently ranked tokens, some only to themselves, etc.  
+  <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/c66e575f-a816-4ebd-a9b9-87e3c49e6948" /> <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/b37ab81f-0bfc-4527-950c-2938f1f162f7" /> <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/2a0ffc5a-85bc-4798-8609-5a2046952c19" />  
+* Layer 1 - Some clear `head1`-only properties are visible. Most tokens either only attend to the rank-wise previous or next elements, showing signs of pair-wise comparisons and global comparisons. The rank-wise greatest element only attends to itself. `head2` remains almost silent for all the tokens.  
+<img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/1d4ec509-05bc-4878-a2e2-2980563fdfe4" /> <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/0e7f6e66-5e40-44ad-b470-bd52b6a0284e" /> <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/4d8dfb5a-6135-4f8c-b02c-36216a8f96a6" />
+* Layer 2 - Both `head1` and `head2` are active - Almost all tokens seem to be attending to both rank-wise adjacent tokens, except the smallest and largest token, who attend to the rank-wise larger and smaller token, respectively. The attention given by `head1` is seemingly stronger than that by `head2`.  
+<img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/73d8fdf9-55ab-4197-b498-03dedf0b6f6b" /> <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/e5d563f8-1f9d-4cee-921b-afab97e5384a" /> <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/c10163ae-4aa2-4548-8494-97619749492d" />  
+
+
+
+
+
+
+
+
+
+
