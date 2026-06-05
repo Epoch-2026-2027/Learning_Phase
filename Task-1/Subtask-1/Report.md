@@ -41,13 +41,23 @@ with an AdamW optimizer (`lr=1e-3`, `weight_decay=1e-3`, `betas=(0.9,0.99)`), an
 For testing metrics, I will be using `CrossEntropyLoss` and `Element-wise Matches`.
 
 ## Baseline Analysis
-Following are the training-validation loss history of the models, for sequence_length=10.  
-MLP Model &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;RNN Model &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;biLSTM Model  
-<img width="300" height="250" alt="10_mlp_loss" src="https://github.com/user-attachments/assets/998166aa-6f79-4e6b-be5b-f58d78845d7f" />
-<img width="300" height="250" alt="10_rnn_loss" src="https://github.com/user-attachments/assets/d17da529-cb34-4cee-9248-f67f4b885d17" />
-<img width="300" height="250" alt="10_lstm_loss" src="https://github.com/user-attachments/assets/434a515f-3557-4bfa-b6f3-b1bd8320ac20" />  
-Testing loss= 1.354&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Testing loss= 1.566&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Testing loss= 0.913  
-Average matches= 4.849&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Average matches= 3.536&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;Average matches= 6.057  
+<table>
+  <tr>
+    <td align="center" width="300">MLP Model</td>
+    <td align="center" width="300">Vanilla RNN Model</td>
+    <td align="center" width="300">biLSTM Model</td>
+  </tr>
+  <tr>
+    <td><img width="300" height="250" src="https://github.com/user-attachments/assets/998166aa-6f79-4e6b-be5b-f58d78845d7f"/></td>
+    <td><img width="300" height="250" src="https://github.com/user-attachments/assets/d17da529-cb34-4cee-9248-f67f4b885d17"/></td>
+    <td><img width="300" height="250" src="https://github.com/user-attachments/assets/434a515f-3557-4bfa-b6f3-b1bd8320ac20"/></td>
+  </tr>
+  <tr>
+    <td align="center">Testing loss = 1.354<br>Average matches = 4.849</td>
+    <td align="center">Testing loss = 1.566<br>Average matches = 3.536</td>
+    <td align="center">Testing loss = 0.913<br>Average matches = 6.057</td>
+  </tr>
+</table>
   
 We can interpret these results well already.  
       1. MLP model, the most basic of the models used, is able to train stably without much overfitting, due to it's simplicity. But it only considers inputs in parallel ; It lacks the ability to tell apart the positions of elements, thus it shows poor inference.  
@@ -140,6 +150,13 @@ With a `Testing loss of 0.903` and an `Average match of 8.586`. It is a much slo
 
 It is able to do this because of the bidirectional Self-Attention mechanism baked into it. It is able to attend to every other taken with respect to a token, and compare everything globally. 
 
+Further, it is just as good at smaller sequence lengths.  
+| Metric | seq=4 | seq=6 | seq=8 | seq=10 |
+|:-------|:-----:|:-----:|:-----:|:------:|
+| Testing loss | 0.514 | 0.884 | 0.910 | 0.903 |
+| Avg matches | 3.554 | 3.958 | 6.396 | 8.586 |  
+
+## Head-wise Attention Visualisation
 Let's observe how the model attends to each token, using the `bertviz` library's `head_view()` function.  
 <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/4013b994-f4e1-4a08-a5b5-cffc692cf45d" />  
 This is the attention visualisation for all tokens to eachother. The two colours represent the attention from each of the two heads.  
@@ -151,7 +168,43 @@ We shall observe some examples and see what emergent properties have arisen.
 * Layer 2 - Both `head1` and `head2` are active - Almost all tokens seem to be attending to both rank-wise adjacent tokens, except the smallest and largest token, who attend to the rank-wise larger and smaller token, respectively. The attention given by `head1` is seemingly stronger than that by `head2`.  
 <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/73d8fdf9-55ab-4197-b498-03dedf0b6f6b" /> <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/e5d563f8-1f9d-4cee-921b-afab97e5384a" /> <img width="176" height="180" alt="image" src="https://github.com/user-attachments/assets/c10163ae-4aa2-4548-8494-97619749492d" />  
 
+It is clear from these that the "BERT" model has indeed learnt to-
+* compare elements pair-wise
+* understand the concept of a minimum element and a maximum element
+* sorting globally across the sequence  
 
+## Ablation Studies
+Now moving onto my ablation studies. They will be divided into two segments-  
+* Data Representation ablations - checking the usability of different modes of representing the sequences with a particular baseline model.
+* Architecture & Attention ablations - direct comparisons of baselines and self attention model, self attention model and variating architecture / hyper parameters. 
+
+### Data-Representation 
+I will be using the biLSTM baseline with a `sequence length=6`, and an optimizer `AdamW(lr=1e-3,weight_decay=1e-3,betas=(0.9,0.99)))`.  
+
+#### Categorical Embeddings vs Continuous Representations  
+
+
+
+#### Sequence Normalization  
+We will be exploring three normalisation strategies-
+    1. Z-Normalisation
+    2. Global Min-Max Normalisation
+    3. Sequence-wise Min-Max Normalisation
+
+<table>
+  <tr>
+    <td align="center" width="300">No Normalisation</td>
+    <td align="center" width="300">Z-Normalisation</td>
+    <td align="center" width="300">Global Min-Max Normalisation</td>
+    <td align="center" width="300">Sequence-wise Min-Max Normalisation</td>
+  </tr>
+  <tr>
+    <td><img width="640" height="480" alt="norm0_6_lstm_loss" src="https://github.com/user-attachments/assets/c32c9b97-1f3d-4af3-8ba9-208f7c2692a3" /></td>
+    <td><img width="300" height="250" alt="norm1_6_lstm_loss" src="https://github.com/user-attachments/assets/69bbf1d2-3390-4e21-a92f-b9bb1a531993" /></td> 
+    <td><img width="300" height="250" alt="norm2_6_lstm_loss" src="https://github.com/user-attachments/assets/3698d62f-85db-4688-a51b-d70ff141c91a" /></td>
+    <td><img width="300" height="250" alt="norm3_6_lstm_loss" src="https://github.com/user-attachments/assets/f5a65868-811d-4179-bd26-5ede2a1436c7" /></td>
+  </tr>
+</table>
 
 
 
