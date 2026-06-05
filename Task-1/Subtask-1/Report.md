@@ -207,9 +207,22 @@ We will be exploring three normalisation strategies-
 </table>  
 
 * <b>Training stability</b> - No normalisation offers a smooth training, yet it picks up on a local minimum which throws its validation loss off by a lot. Z-Normalisation offers the highest training stability of the four options. Global Min-Max scaling offers the worst performance - the model loses all information as very tiny values get compressed even more. Sequence-wise Min-Max scaling has a mostly smooth descent, placing it close to the best.  
-* <b>Convergence</b> - No normalisation has bad convergence, it gets stuck in a locak gradient and starts over-fitting. Sequence-wise Min-Max scaling and Z-normalisation offer superior results, while Global Min-Max scaling leads to chaos and no proper convergence.
-* <b>Out-of-distribution performance</b> - Upon testing with an example, [1, 2, 3, 4, 5, 6]  
-  No normalisation ---> [5, 3, 3, 1, 2, 5]
+  
+* <b>Convergence</b> - No normalisation has bad convergence, it gets stuck in a locak gradient and starts over-fitting. Sequence-wise Min-Max scaling and Z-normalisation offer superior results, while Global Min-Max scaling leads to chaos and no proper convergence.  
+  
+* <b>Out-of-distribution performance</b> - Upon testing with an example, `[1, 2, 3, 4, 5, 6]`  
+  No normalisation ---> `[5, 3, 3, 1, 2, 5]`  
+  Z-normalisation ---> `[0, 0, 0, 1, 5, 5]`  
+  Global Min-Max scaling ---> `[5, 5, 5, 5, 4, 5]`  
+  Sequence-wise Min-Max scaling ---> `[0, 0, 0, 1, 2, 5]`
+    
+  Or for an example `[100, 200, 300, 400, 500, 600]`,  
+  No normalisation ---> `[0, 1, 2, 4, 4, 4]`  
+  Z-normalisation ---> `[0, 0, 1, 4, 5, 1]`  
+  Global Min-Max scaling ---> `[5, 0, 5, 5, 0, 5]`  
+  Sequence-wise Min-Max scaling ---> `[0, 2, 5, 3, 5, 2]`  
+  It <i>can</i> be argued that Z-Normalisation and Sequence-wise Min-Max scaling are much better than the other options, as they do seem to rank outliers somewhat   well.
+  
   
   
 
