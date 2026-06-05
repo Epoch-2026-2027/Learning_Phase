@@ -178,13 +178,9 @@ Now moving onto my ablation studies. They will be divided into two segments-
 * Data Representation ablations - checking the usability of different modes of representing the sequences with a particular baseline model.
 * Architecture & Attention ablations - direct comparisons of baselines and self attention model, self attention model and variating architecture / hyper parameters. 
 
-### Data-Representation 
+### Data-Representation  
 I will be using the biLSTM baseline with a `sequence length=6`, and an optimizer `AdamW(lr=1e-3,weight_decay=1e-3,betas=(0.9,0.99)))`.  
-
-#### Categorical Embeddings vs Continuous Representations  
-
-
-
+  
 #### Sequence Normalization  
 We will be exploring three normalisation strategies-  
     1. Z-Normalisation  
@@ -199,7 +195,7 @@ We will be exploring three normalisation strategies-
     <td align="center" width="300">Sequence-wise Min-Max Normalisation</td>
   </tr>
   <tr>
-    <td><img width="640" height="480" alt="norm0_6_lstm_loss" src="https://github.com/user-attachments/assets/c32c9b97-1f3d-4af3-8ba9-208f7c2692a3" /></td>
+    <td><img width="300" height="250" alt="rawnumerical_6_lstm_loss" src="https://github.com/user-attachments/assets/08cf3415-ad09-42be-9052-54a96ae612bf" /></td> 
     <td><img width="300" height="250" alt="norm1_6_lstm_loss" src="https://github.com/user-attachments/assets/69bbf1d2-3390-4e21-a92f-b9bb1a531993" /></td> 
     <td><img width="300" height="250" alt="norm2_6_lstm_loss" src="https://github.com/user-attachments/assets/3698d62f-85db-4688-a51b-d70ff141c91a" /></td>
     <td><img width="300" height="250" alt="norm3_6_lstm_loss" src="https://github.com/user-attachments/assets/f5a65868-811d-4179-bd26-5ede2a1436c7" /></td>
@@ -211,20 +207,20 @@ We will be exploring three normalisation strategies-
 * <b>Convergence</b> - No normalisation has bad convergence, it gets stuck in a locak gradient and starts over-fitting. Sequence-wise Min-Max scaling and Z-normalisation offer superior results, while Global Min-Max scaling leads to chaos and no proper convergence.  
   
 * <b>Out-of-distribution performance</b> - Upon testing with an example, `[1, 2, 3, 4, 5, 6]`  
-  No normalisation ---> `[5, 3, 3, 1, 2, 5]`  
+  No normalisation ---> `[4, 1, 4, 4, 2, 2]`  
   Z-normalisation ---> `[0, 0, 0, 1, 5, 5]`  
   Global Min-Max scaling ---> `[5, 5, 5, 5, 4, 5]`  
   Sequence-wise Min-Max scaling ---> `[0, 0, 0, 1, 2, 5]`
     
   Or for an example `[100, 200, 300, 400, 500, 600]`,  
-  No normalisation ---> `[0, 1, 2, 4, 4, 4]`  
+  No normalisation ---> `[0, 1, 2, 4, 4, 5]`  
   Z-normalisation ---> `[0, 0, 1, 4, 5, 1]`  
   Global Min-Max scaling ---> `[5, 0, 5, 5, 0, 5]`  
   Sequence-wise Min-Max scaling ---> `[0, 2, 5, 3, 5, 2]`  
-  It <i>can</i> be argued that Z-Normalisation and Sequence-wise Min-Max scaling are much better than the other options, as they do seem to rank outliers somewhat   well.
-  
-  
-  
+  It <i>can</i> be argued that Z-Normalisation and Sequence-wise Min-Max scaling are much better than the other options, as they do seem to rank outliers somewhat   well.  
+
+#### Categorical Embeddings vs Continuous Representations  
+
 
 
 
