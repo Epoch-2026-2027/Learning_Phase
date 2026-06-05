@@ -14,5 +14,5 @@ class MLPPredictor(torch.nn.Module):
         )
 
     def forward(self,x):
-        return self.model(x)
+        return self.model(x).reshape(-1,10,10)
     

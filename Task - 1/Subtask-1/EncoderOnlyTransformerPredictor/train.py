@@ -13,8 +13,8 @@ test_data = DataLoader(test_dataset,batch_size=4096)
 max_epochs = 100
 learning_rate = 1e-3
 
-#device = "cuda:0" if torch.cuda.is_available() else "cpu"
-device = "cuda"
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+#device = "cpu"
 model = EncoderOnlyTransformerPredictor(device)
 model.to(device)
 loss_fn = nn.CrossEntropyLoss()
@@ -28,7 +28,7 @@ for i in range(max_epochs):
         y = y.to(device)
         x = x.to(device)
         pred = model(x)
-        loss = loss_fn(pred,y)
+        loss = loss_fn(pred.transpose(-1,-2),y)
         loss.backward()
         s+=loss.item()
         opt.step()
@@ -39,12 +39,9 @@ for i in range(max_epochs):
             y = y.to(device)
             x = x.to(device)
             pred = model(x)
-            pred = torch.sigmoid(pred)
-            pred = pred.reshape(-1,10,10)
-            pred = torch.argmax(pred,dim=-1).reshape(-1)
-            y = y.reshape(-1,10,10)
-            y = torch.argmax(y,dim=-1).reshape(-1)
-            total += (y == pred).sum().cpu() 
+            pred = torch.softmax(pred,dim=-1)
+            pred = torch.argmax(pred,dim=-1)
+            total += (y == pred).reshape(-1).sum().cpu() 
         if (i%10 == 0):
             print(total/valid_size/10)
 
@@ -60,12 +57,9 @@ with torch.no_grad():
         y = y.to(device)
         x = x.to(device)
         pred = model(x)
-        pred = torch.sigmoid(pred)
-        pred = pred.reshape(-1,10,10)
-        pred = torch.argmax(pred,dim=-1).reshape(-1)
-        y = y.reshape(-1,10,10)
-        y = torch.argmax(y,dim=-1).reshape(-1)
-        z = (y == pred)
+        pred = torch.softmax(pred,dim=-1)
+        pred = torch.argmax(pred,dim=-1)
+        z = (y == pred).reshape(-1)
         total2+=z.sum()
         z = z.reshape(-1,10)
         total += torch.where(torch.sum(z,dim = -1) == 10, 1,0).sum()

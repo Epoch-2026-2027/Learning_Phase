@@ -30,7 +30,7 @@ class LSTMPredictor(torch.nn.Module):
             nn.Sigmoid()
         )
         self.W_oh = nn.Sequential(
-            nn.Linear(self.history*10+self.cell_size+10,100)
+            nn.Linear(self.history+self.cell_size+10,100)
         )
 
     def forward(self,x):
@@ -47,7 +47,7 @@ class LSTMPredictor(torch.nn.Module):
             # getting output
             h = self.W_hh(combined_inputs) * self.W_hc(c)
             outputs.append(h)
-        h = torch.concat(outputs,dim = 1)
+        #h = torch.concat(outputs,dim = 1)
         y = self.W_oh(torch.concat((h,c,x),dim = 1))
-        return y
+        return y.reshape(-1,10,10)
     

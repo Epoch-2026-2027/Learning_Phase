@@ -11,12 +11,7 @@ class NumArrayDataset(Dataset):
     def __init__(self,data):
         self.data = np.array(data,dtype = "int")
         self.x = torch.Tensor(self.data[:,:10])
-        self.y = self.data[:,10:]
-        tmp = np.zeros((len(self.data),10,10))
-        for i in range(len(self.data)):
-            for j in range(10):
-                tmp[i,j,self.y[i,j]] = 1
-        self.y = tmp.reshape(-1,100)
+        self.y = torch.LongTensor(self.data[:,10:])
 
     def __len__(self):
         return self.data.shape[0]

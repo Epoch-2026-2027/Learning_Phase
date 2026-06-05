@@ -1,37 +1,29 @@
 import torch
-from torch import nn
+from torch import mean, nn
 import numpy as np
 
-class Attention(nn.Module):
-    def __init__(self,size,size2):
-        super().__init__()
-        self.W_Q = nn.Parameter(torch.randn((size,size2)))
-        self.W_K = nn.Parameter(torch.randn((size,size2)))
-        self.W_V = nn.Parameter(torch.randn((size,size2)))
-        self.sf = nn.Softmax(dim=-1)
-        self.size2 = size2
-
-    def forward(self,x):
-        return self.sf(1/np.sqrt(self.size2)*((x@self.W_Q)@(x@self.W_V).mT))@x@self.W_V
 
 class AddAndNormalise(nn.Module):
     def __init__(self):
         super().__init__()
+        self.a = nn.Parameter(torch.ones(1))
+        self.b = nn.Parameter(torch.zeros(1))
+
 
     def forward(self,x,y):
         h = torch.concat([x,y],dim = -1)
-        return (h - h.mean())/h.std()
+        return self.a*(h - torch.mean(h,dim = -1,keepdim=True))/torch.std(h,dim=-1,keepdim=True) + self.b
 
 
 class MultiHeadAttention(nn.Module):
     def __init__(self,nheads,input_dim,attention_layers,device):
         super().__init__()
         self.device = device
-        self.W_Q = nn.Parameter(torch.randn((input_dim,attention_layers*nheads)))
-        self.W_K = nn.Parameter(torch.randn((input_dim,attention_layers*nheads)))
-        self.W_V = nn.Parameter(torch.randn((input_dim,attention_layers*nheads)))
-        self.W_O = nn.Parameter(torch.randn((attention_layers*nheads,attention_layers*nheads)))
-        
+        self.W_Q = nn.Parameter(torch.randn((input_dim,attention_layers*nheads))/input_dim**.5)
+        self.W_K = nn.Parameter(torch.randn((input_dim,attention_layers*nheads))/input_dim**.5)
+        self.W_V = nn.Parameter(torch.randn((input_dim,attention_layers*nheads))/input_dim**.5)
+        self.W_O = nn.Parameter(torch.randn((attention_layers*nheads,attention_layers*nheads))/(attention_layers)**.5)
+
         self.sf = nn.Softmax(dim=-1)
         self.attention_layers = attention_layers
         self.nheads = nheads
@@ -60,7 +52,7 @@ class MultiHeadAttention(nn.Module):
         
 
     def scaledDotProduct(self,Q,K,V):
-        return self.sf(1/torch.sqrt(torch.Tensor([Q.shape[-1]]).to(self.device))*(Q@(K.mT)))@V
+        return self.sf(1/torch.sqrt(torch.Tensor([Q.shape[-1]]).to(self.device))*(Q@(K.transpose(-1,-2))))@V
 
 
 class EncoderOnlyTransformerPredictor2(torch.nn.Module):
@@ -69,24 +61,25 @@ class EncoderOnlyTransformerPredictor2(torch.nn.Module):
         self.device = device
         self.att = MultiHeadAttention(4,2,16,device)
         self.norm = AddAndNormalise()
-        self.W_1 = nn.Parameter(torch.randn((4*16+2,64)))
-        self.b_1 = nn.Parameter(torch.randn(64))
-        self.W_2 = nn.Parameter(torch.randn((64,10)))
-        self.b_2 = nn.Parameter(torch.randn(10))
+        self.W_1 = nn.Parameter(torch.randn((4*16+2,64))/66**0.5)
+        self.b_1 = nn.Parameter(torch.randn(64)*0.1)
+        self.W_2 = nn.Parameter(torch.randn((64,10))/8)
+        self.b_2 = nn.Parameter(torch.randn(10)*0.1)
         self.r = nn.ReLU()
         self.ff = lambda x : self.r(x@self.W_1+self.b_1)@self.W_2 + self.b_2
 
     def forward(self,x):
         x2 = self.position_embedded(x)
         x3 = self.att(x2)
-        #print(x3.shape)
         x4 = self.norm(x2,x3)
         
-        return self.ff(x4).reshape(-1,100)
+        x5 = self.ff(x4)
+        return x5
 
     def position_embedded(self,x):
         x = x.reshape(-1,x.shape[1],1)
         P = torch.zeros_like(x)
         for i in range(x.shape[1]):
-            P[:,i,0] = 2**(-i)
+            P[:,i,0] = (1.5)**(-i)
+            #P[:,i,0] = np.sin(i)
         return torch.concat([x,P], dim = -1)

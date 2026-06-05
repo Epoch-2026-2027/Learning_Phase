@@ -1,0 +1,861 @@
+\let\negmedspace\undefined
+\let\negthickspace\undefined
+\documentclass[journal,12pt,onecolumn]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\graphicspath{{./figs/}}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{txfonts}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\usepackage{gensymb}
+\usepackage{comment}
+\usepackage{caption}
+\usepackage[breaklinks=true]{hyperref}
+\usepackage{tkz-euclide} 
+\usepackage{listings}
+%\def\inputGnumericTable{}                                 
+\usepackage[latin1]{inputenc}     
+\usepackage{xparse}
+\usepackage{color}                                            
+\usepackage{array}                                            
+\usepackage{longtable}                                       
+\usepackage{calc}                                             
+\usepackage{multirow}
+\usepackage{multicol}
+\usepackage{hhline}                                           
+\usepackage{ifthen}                                           
+\usepackage{lscape}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{float}
+\usepackage{circuitikz}
+\begin{document}
+
+\title{ENCODER-ONLY TRANSFORMER}
+\author{ABHISEK MOHAPATRA- AI25BTECH11001 }
+{\let\newpage\relax\maketitle}
+
+\section{Abstract}
+In this report, we will trying to predict ranks of a sequence of integers(place of the integer in ascending order). Well, it is not very hard to solve the problem but we want to see how the transformer encodes the order through attention and how it beats other methods such as MLP , RNN and LSTM. All the model and its architecture will coded from scratch (however, using pytorch primitives to get a boost in training time).
+
+\section{Baselines}
+We will go from MLP to LSTM, and see how they predict the ranks.
+\subsection{MLP}
+Well, MLP architecture is simple and straight forward.
+\begin{figure}[!ht]
+\centering
+\resizebox{1\textwidth}{!}{%
+\begin{circuitikz}
+\tikzstyle{every node}=[font=\fontsize{14.2pt}{18.5pt}\selectfont]
+\draw  (-1.75,15.25) rectangle (0.625,9.875);
+\node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (-0.5625,12.5625) {\fontsize{18.2pt}{23.7pt}\selectfont Input \\ Layer \\ (10)};
+\draw  (4.25,15.25) rectangle (6.625,9.875);
+\node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (5.4375,12.5625) {\fontsize{18.2pt}{23.7pt}\selectfont Hidden \\ Layer \\ (128)};
+\draw  (10.25,15.25) rectangle (12.625,9.875);
+\node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.4375,12.5625) {\fontsize{18.2pt}{23.7pt}\selectfont Hidden \\ Layer \\ (256)};
+\draw  (19.875,15.25) rectangle (22.25,9.875);
+\node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.0625,12.5625) {\fontsize{15.9pt}{20.7pt}\selectfont Reshaped \\ Output \\ Layer \\ (10,10)};
+\draw  (8.375,12.75) circle (0.875cm) node[ inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] {\fontsize{15.9pt}{20.7pt}\selectfont Relu} ;
+\draw  (14.375,13) circle (0.875cm) node[ inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] {\fontsize{15.9pt}{20.7pt}\selectfont Relu} ;
+\draw  (2.375,12.875) circle (0.875cm) node[ inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] {\fontsize{15.9pt}{20.7pt}\selectfont Relu} ;
+\draw [-{Stealth[scale=1.5]}, ] (0.625,13.125) -- (1.5,12.875);
+\draw [-{Stealth[scale=1.5]}, ] (3.25,12.875) -- (4.25,13.25);
+\draw [-{Stealth[scale=1.5]}, ] (6.625,13.125) -- (7.5,12.75);
+\draw [-{Stealth[scale=1.5]}, ] (9.25,12.875) -- (10.25,13.5);
+\draw [-{Stealth[scale=1.5]}, ] (12.625,13.625) -- (13.5,13);
+\draw [-{Stealth[scale=1.5]}, ] (15.25,13.125) -- (16.25,13.75);
+\draw  (16.25,15.25) rectangle (18.625,9.875);
+\node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (17.4375,12.5625) {\fontsize{18.2pt}{23.7pt}\selectfont Output \\ Layer \\ (100)};
+\draw [-{Stealth[scale=1.5]}, ] (18.625,12.75) -- (19.875,12.75);
+\draw  (23.125,15.25) rectangle (25.375,9.875);
+\node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (24.25,12.5625) {\fontsize{15.9pt}{20.7pt}\selectfont Softmax};
+\draw  (26.375,15.125) rectangle (28.75,9.75);
+\node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (27.5625,12.4375) {\fontsize{14.2pt}{18.5pt}\selectfont Output \\ Probabilties \\ (10,10)};
+\draw [-{Stealth[scale=1.5]}, ] (22.25,12.875) -- (23.125,12.875);
+\draw [-{Stealth[scale=1.5]}, ] (25.375,12.875) -- (26.375,12.875);
+\end{circuitikz}
+}%
+\caption{MLP Architecture (the number denotes the node in each layer)}
+\label{fig:my_label}
+
+\end{figure}
+
+Here the input layer will be provided with the ten numbers whose rank to be predicted. And after that it predict 100 values in output layer which is then softmaxed to get the probabilities of each rank for the given number.
+
+\subsubsection{Normalisation and Data preparation}
+
+The input are normalised z-score of the original numbers. The output is directly feed into the loss function as nn.CrossEntropy can accept classes as input.
+
+\subsubsection{Training}
+The training dataset, validation dataset and test dataset are divided in ratio of 8:1:1. The training dataset then divided into batches of size 64. The optimiser used is $torch.optim.AdamW(learning_rate = 0.003)$ and it is trained for 100 epochs.
+
+\begin{figure}[H]
+	\includegraphics[width = 0.5\textwidth]{MLP1.png}
+	\includegraphics[width = 0.5\textwidth]{MLP2.png}
+	\caption{(Left)loss over the epochs (Right) validation accuracy over epochs}
+	\label{fig:my_label}
+\end{figure}
+As you can see,it saturates over 65\% validation accuracy. Well, there are few were metric apart from this.
+
+\subsubsection{Evaluation}
+\begin{enumerate}
+	\item Test Accuracy (\%): tensor(66.2100, device='cuda:0')
+	\item Full sequence correct (\%): tensor(1.5000, device='cuda:0')
+	\item Atmost 1 incorect sequence correct (\%): tensor(10.1000, device='cuda:0')
+	\item Atmost 2 incorect sequence correct (\%): tensor(29.4000, device='cuda:0')
+	\item Average no of rank predicted incorect in a sequence : tensor(3.3790, device='cuda:0')
+
+\end{enumerate}
+A few testcases are here:
+\begin{enumerate}
+	\item 5 testcase
+x :  [ 0.610968    1.1796409   0.51500446 -0.32734233  0.6749437  -1.1092676
+  0.26621005 -1.7490246   0.9806054  -1.0417378 ]
+
+		pred :  [5 9 5 3 6 2 4 0 7 2]
+
+		true :  [6 9 5 3 7 1 4 0 8 2]
+\item 10 testcase
+
+	x :  [ 0.7435295   0.95780313 -1.2706426  -1.9134635   0.6399639  -0.63853544
+ -0.3314099   0.9292333   0.63282144  0.25070015]
+
+		pred :  [8 8 1 0 5 2 3 9 6 4]
+
+		true :  [7 9 1 0 6 2 3 8 5 4]
+\item 15 testcase
+
+	x :  [ 0.01127135  0.3719545  -1.2436054   0.3944972   0.          0.9317648
+ -0.2329412  -2.103985    0.7626946   1.1083492 ]
+
+		pred :  [3 6 1 6 4 9 2 0 7 9]
+
+		true :  [4 5 1 6 3 8 2 0 7 9]
+\item 20 testcase
+
+	x :  [-0.35796353 -1.284492    1.050948   -0.5256211   0.8803491   0.38325924
+ -0.7168095   1.0627134  -1.5021527   1.009769  ]
+
+		pred :  [3 1 9 4 7 5 2 8 0 7]
+
+		true :  [4 1 8 3 6 5 2 9 0 7]
+\item 25 testcase
+
+	x :  [ 1.5437944   0.6811236   1.2894996  -1.034561   -0.93155557 -0.78026634
+  0.46545592  0.28841528 -1.2534477  -0.26845798]
+
+		pred :  [9 6 8 1 2 2 6 5 0 4]
+
+		true :  [9 7 8 1 2 3 6 5 0 4]
+\item 30 testcase
+
+	x :  [-1.0927486   0.2008844   0.7167743  -1.0614825   0.24387524  0.9434532
+  0.19697616 -1.6828954   0.01719633  1.517967  ]
+
+		pred :  [1 4 7 2 5 8 6 0 3 9]
+
+		true :  [1 5 7 2 6 8 4 0 3 9]
+\item 35 testcase
+
+	x :  [ 0.42147765  0.28269842  1.2644329  -1.3312526  -0.8275354   0.24671862
+ -0.71959597  0.1439192  -1.1462135   1.6653507 ]
+
+		pred :  [6 5 8 0 2 5 2 5 1 9]
+
+		true :  [7 6 8 0 2 5 3 4 1 9]
+\item 40 testcase
+
+	x :  [ 0.8400531  -1.0256346   0.82031035  0.2576426   0.92889535 -0.8430145
+ -0.76897925 -0.4580313  -1.3069686   1.555727  ]
+
+pred :  [7 2 6 5 7 3 3 3 0 9]
+
+true :  [7 1 6 5 8 2 3 4 0 9]
+
+\item 45 testcase
+
+	x :  [ 1.405338   -0.5287208  -0.62235147  1.0922605  -0.06056734 -0.9500589
+  1.5721178  -0.9003176  -0.98809636 -0.01960391]
+
+pred :  [8 4 4 7 6 2 8 1 1 5]
+
+true :  [8 4 3 7 5 1 9 2 0 6]
+\item 50 testcase
+
+	x :  [-0.01717724  0.5732906  -0.661324    0.7665346  -0.28020385  1.383842
+ -0.04401669 -1.7026945   1.1637585  -1.1820092 ]
+
+pred :  [4 7 3 7 4 9 5 0 8 1]
+
+true :  [5 6 2 7 3 9 4 0 8 1]
+\end{enumerate}
+
+Well we see that the model seemed to have learnt as it has predicted some of the rank correctly. Which means that model has some how encode the arrangements in the train data in the weights. but well it is easy to catch that is doesn't do well with close numbers. For number which are close it repeats itself.
+
+
+This is a problem as we should atleast have a valid one (may wrong) rather than a invalid one.
+
+
+Moreover it is unable scale too as it is designed for 10 numbers only.
+
+
+
+
+
+\textbf{Listing all the drawbacks:}
+
+- invalid seq output
+
+- repeating the ranks for the values nearly same values
+
+- not architecture is not very scale very well as the input size is fixed at 10
+
+- doesn't catch new patterns easily as it is not able to distinguish near values.
+
+
+\textbf{Good aspects:}
+
+- can easily computed as some matrix multiplication
+
+\subsection{RNN}
+Well, RNN architecture is a vanilla RNN with a final predicting layer.
+
+Here the input layer will be provided with the ten numbers whose rank to be predicted. And after that it predict 10 values for each input feature and then those 100 values are passed in output layer, which is then softmaxed to get the probabilities of each rank for the given number.
+
+The output Layer helps RNN here to see the entire seq.
+
+\textbf{Note: normal RNN will be very bad at predicting here , so this modification is added. }
+
+\begin{figure}[!ht]
+\centering
+\resizebox{1\textwidth}{!}{%
+\begin{circuitikz}
+\tikzstyle{every node}=[font=\fontsize{18.2pt}{23.7pt}\selectfont]
+
+\draw (-15,15.625) rectangle (-6.25,11.125);
+\draw (-16.5,12.875) circle (1cm) node {$h_0$};
+\draw (-13.75,7.375) circle (1cm) node {$x_1$};
+\node at (-13.75,12.875) [circ] {};
+
+\draw (-15.5,12.875) -- (-13.75,12.875);
+\draw (-13.75,8.375) -- (-13.75,12.875);
+\draw (-14.75,15.25) rectangle (-12,13.5) node[pos=.5, align=center] {Output \\ Layer};
+
+\draw [rounded corners = 22.5] (-8.625,13.625) rectangle (-6.875,12.125) node[pos=.5] {$\tanh$};
+\draw (-13.75,12.875) -- (-11.625,12.875);
+\draw (-13.125,12.875) -- (-13.125,13.5);
+\draw (-11.625,14) rectangle (-9.25,11.75) node[pos=.5, align=center] {Linear \\ Layer};
+\draw (-9.25,12.875) -- (-8.625,12.875);
+\draw (-6.875,12.875) -- (-4.875,12.875);
+\draw (-13,17.75) circle (1cm) node {$y_1$};
+\draw (-13.125,16.75) -- (-13.125,15.25);
+
+\draw (-2.375,15.625) rectangle (6.375,11.125);
+\draw (-3.875,12.875) circle (1cm) node {$h_1$};
+\draw (-1.125,7.375) circle (1cm) node {$x_2$};
+\node at (-1.125,12.875) [circ] {};
+
+\draw (-2.875,12.875) -- (-1.125,12.875);
+\draw (-1.125,8.375) -- (-1.125,12.875);
+\draw (-2.125,15.25) rectangle (0.625,13.5) node[pos=.5, align=center] {Output \\ Layer};
+
+\draw [rounded corners = 22.5] (4,13.625) rectangle (5.75,12.125) node[pos=.5] {$\tanh$};
+\draw (-1.125,12.875) -- (1,12.875);
+\draw (-0.5,12.875) -- (-0.5,13.5);
+\draw (1,14) rectangle (3.375,11.75) node[pos=.5, align=center] {Linear \\ Layer};
+\draw (3.375,12.875) -- (4,12.875);
+\draw (5.75,12.875) -- (7.75,12.875);
+\draw (-0.375,17.75) circle (1cm) node {$y_2$};
+\draw (-0.5,16.75) -- (-0.5,15.25);
+
+\draw [dashed] (7.75,12.875) -- (15.375,12.875);
+
+\draw (15.875,15.625) rectangle (24.625,11.125);
+\draw (26.0,12.875) circle (1cm) node {$h_{10}$};
+\draw (17.125,7.375) circle (1cm) node {$x_{10}$};
+\node at (17.125,12.875) [circ] {};
+
+\draw (15.375,12.875) -- (17.125,12.875);
+\draw (17.125,8.375) -- (17.125,12.875);
+\draw (16.125,15.25) rectangle (18.875,13.5) node[pos=.5, align=center] {Output \\ Layer};
+
+\draw [rounded corners = 22.5] (22.25,13.625) rectangle (24,12.125) node[pos=.5] {$\tanh$};
+\draw (17.125,12.875) -- (19.25,12.875);
+\draw (17.75,12.875) -- (17.75,13.5);
+\draw (19.25,14) rectangle (21.625,11.75) node[pos=.5, align=center] {Linear \\ Layer};
+\draw (21.625,12.875) -- (22.25,12.875);
+\draw (24,12.875) -- (25.0,12.875); 
+\draw (17.875,17.75) circle (1cm) node {$y_{10}$};
+\draw (17.75,16.75) -- (17.75,15.25);
+
+\draw (9,27.75) rectangle (13.875,24.625) node[pos=.5, align=center] {Class \\ probabilities};
+\draw (-12.875,28.125) rectangle (-6.875,23.625) node[pos=.5, align=center] {Output Layer};
+\draw (-2.125,28) rectangle (3,24.25) node[pos=.5, align=center] {Softmax Layer};
+
+\draw (-13,18.75) -- (-13,20);
+\draw (-0.5,18.75) -- (-0.5,20);
+\draw (17.75,18.75) -- (17.75,20);
+\draw (-13,20) -- (17.75,20);
+\draw (17.75,20) -- (17.75,22.5);
+\draw (17.75,22.5) -- (-9.875,22.5);
+\draw (-9.875,22.5) -- (-9.875,23.625);
+\draw (-7,26.25) -- (-2.125,26.25);
+\draw (3,26.25) -- (9,26.25);
+
+\end{circuitikz}
+}%
+\caption{RNN Architecture}
+\label{fig:my_label}
+\end{figure}
+
+
+\subsubsection{Normalisation and Data preparation}
+
+The input are normalised z-score of the original numbers. The output is directly feed into the loss function as nn.CrossEntropy can accept classes as input.
+
+\subsubsection{Training}
+The training dataset, validation dataset and test dataset are divided in ratio of 8:1:1. The training dataset then divided into batches of size 64. The optimiser used is $torch.optim.AdamW(learning_rate = 0.002)$ and it is trained for 100 epochs.
+
+\begin{figure}[H]
+	\includegraphics[width = 0.5\textwidth]{RNN1.png}
+	\includegraphics[width = 0.5\textwidth]{RNN2.png}
+	\caption{(Left)loss over the epochs (Right) validation accuracy over epochs}
+	\label{fig:my_label}
+\end{figure}
+As you can see,it saturates over 75.1\% validation accuracy. Well, there are few were metric apart from this.
+
+\subsubsection{Evaluation}
+\begin{enumerate}
+	\item Test Accuracy (\%): 75.4
+	\item Full sequence correct (\%): 7.3
+	\item Atmost 1 incorect sequence correct (\%): 27.2
+	\item Atmost 2 incorect sequence correct (\%): 53.1
+	\item Average no of rank predicted incorect in a sequence : 2.46
+\end{enumerate}
+A few testcases are here:
+\begin{enumerate}
+	\item 5 testcase
+
+		x :  [[-1.5956196   0.23901713 -0.9372079  -0.24450393  0.19443718  1.7204434
+   0.9042873  -0.2787962  -0.8857695   0.8837119 ]]
+
+		pred :  [0 6 1 3 6 9 7 4 2 7]
+
+		true :  tensor([0, 6, 1, 4, 5, 9, 8, 3, 2, 7])
+\item 10 testcase
+
+	x :  [[ 1.0385584   0.26576534  0.59875745  1.1202357  -0.5353005   0.22178528
+  -1.1227487  -1.1290315   1.0479827  -1.5060037 ]]
+
+		pred :  [8 5 6 8 3 5 1 1 8 0]
+
+		true :  tensor([7, 5, 6, 9, 3, 4, 2, 1, 8, 0])
+	\item 15 testcase
+
+		x :  [[ 0.5755595  -1.6082455  -0.9784825   0.56616    -0.90015376  1.321249
+   1.3118496   0.27164406 -0.66516757  0.10558712]]
+
+		pred :  [7 0 1 6 2 9 9 4 3 5]
+
+		true :  tensor([7, 0, 1, 6, 2, 9, 8, 5, 3, 4])
+	\item 20 testcase
+
+		x :  [[-0.6699673   0.6933111  -0.96876806 -0.39917913 -0.5299044  -1.5710382
+   0.34782276  0.5252357   0.7773488   1.7951388 ]]
+
+		pred :  [2 7 1 3 3 0 5 6 7 9]
+
+		true :  tensor([2, 7, 1, 4, 3, 0, 5, 6, 8, 9])
+	\item 25 testcase
+
+		x :  [[-0.732511    1.1469384   0.41175953 -0.9963454  -1.0437763   0.53033674
+   1.2151204   1.2447647  -0.96373665 -0.81255066]]
+
+		pred :  [3 8 6 3 1 6 8 8 3 3]
+
+		true :  tensor([4, 7, 5, 1, 0, 6, 8, 9, 2, 3])
+	\item 30 testcase
+
+		x :  [[-1.3681347  -0.73531073  0.8606407   1.4564214  -0.6149198  -1.0069621
+  -0.4111813   1.187857    0.842119   -0.21052976]]
+
+		pred :  [0 2 7 9 3 1 4 8 6 5]
+
+		true :  tensor([0, 2, 7, 9, 3, 1, 4, 8, 6, 5])
+	\item 35 testcase
+
+		x :  [[ 0.48758876  1.5335821   0.17898828  0.5687995  -0.82152694  1.1242803
+  -0.8605081   0.3284159  -1.4159889  -1.1236306 ]]
+
+		pred :  [6 9 4 7 2 8 1 5 0 1]
+
+		true :  tensor([6, 9, 4, 7, 3, 8, 2, 5, 0, 1])
+	\item 40 testcase
+
+		x :  [[ 0.48174942 -0.9599824  -1.8127141   0.1535503   0.41142103  0.3498837
+   0.63412756 -1.3145547   1.0414461   1.015073  ]]
+
+pred :  [6 2 0 4 7 4 8 1 8 9]
+
+true :  tensor([6, 2, 0, 3, 5, 4, 7, 1, 9, 8])
+\item 45 testcase
+
+	x :  [[-0.30514166 -1.0679958   0.43754897 -0.9873416   0.80721396 -0.02621259
+   1.7649825  -1.0612745  -0.6781672   1.1163883 ]]
+
+pred :  [4 0 6 2 7 5 9 0 2 8]
+
+true :  tensor([4, 0, 6, 2, 7, 5, 9, 1, 3, 8])
+\item 50 testcase
+
+	x :  [[-0.60002077 -0.8662416  -0.6546302   0.1679239  -0.09829692  1.4034616
+  -0.18021101  1.9051853  -1.316769    0.23959872]]
+
+pred :  [3 1 3 6 6 8 4 9 0 7]
+
+true :  tensor([3, 1, 2, 6, 5, 8, 4, 9, 0, 7])
+\end{enumerate}
+
+Well we see that the model seemed to have learnt as it has predicted some of the rank correctly. The model is able to predict very well. but well it is easy to catch that is doesn't do well with numbers with lesser difference. For number which are close it repeats itself. 
+
+Moreover, it also swap places for separated too far.
+
+Moreover it is unable scale too as it is designed for 10 numbers only.
+
+
+
+\textbf{Listing all the drawbacks:}
+
+- invalid seq output but better than previous.
+
+- repeating the ranks for the values nearly same values
+
+- not architecture is not very scale very well as the input size is fixed at 10
+
+- doesn't catch new patterns easily as it is not able to distinguish near values.
+
+- forget far values
+
+- computational heavy
+
+
+\textbf{Good aspects:}
+
+- better accuracy and better understanding of the problem 
+
+
+\subsection{LSTM}
+Well, LSTM architecture is a simple implementation.
+
+Here the input layer will be provided with the ten numbers whose rank to be predicted. And after that it iterates over each value and stores those values in history and cell state. After that these vector are passed into a output layer and then softmax is applied.
+
+The output layer helps here to rank the entire seq.
+\begin{figure}[!ht]
+\centering
+\begin{circuitikz}[scale=0.33, transform shape]
+\tikzstyle{every node}=[font=\fontsize{18.2pt}{23.7pt}\selectfont]
+
+\draw (-11.5,17.25) -- (-11.5,18.5);
+\draw (1,17.25) -- (1,18.5);
+\draw (19.625,17.25) -- (19.625,18.5);
+\draw (-11.5,18.5) -- (28.75,18.5);
+\draw (28.75,18.5) -- (28.75,7.75);
+\draw (28.75,7.75) -- (1.125,7.75);
+
+\draw (-15,14) rectangle (-7.25,9.5) node[pos=.5] {LSTM};
+
+\node (h0) at (-17.25,12.875) [circle, draw, minimum size=1.75cm] {$h_0$};
+\node (c0) at (-17.25,10.5) [circle, draw, minimum size=1.75cm] {$c_0$};
+\node (x1) at (-11.5,16.5) [circle, draw, minimum size=1.5cm] {$x_1$};
+
+\draw (h0.east) -- (-15,12.875);
+\draw (c0.east) -- (-15,10.5);
+\draw (x1.south) -- (-11.5,14);
+
+\draw (-2.5,14) rectangle (5.25,9.5) node[pos=.5] {LSTM};
+
+\node (h1) at (-4.75,12.875) [circle, draw, minimum size=1.75cm] {$h_1$};
+\node (c1) at (-4.75,10.5) [circle, draw, minimum size=1.75cm] {$c_1$};
+\node (x2) at (1,16.5) [circle, draw, minimum size=1.5cm] {$x_2$};
+
+\draw (-7.25,12.875) -- (h1.west);
+\draw (-7.25,10.5) -- (c1.west);
+\draw (h1.east) -- (-2.5,12.875);
+\draw (c1.east) -- (-2.5,10.5);
+\draw (x2.south) -- (1,14);
+
+
+	\draw (16.25,14) rectangle (24,9.5) node[pos=.5] {LSTM};
+
+\node (h9) at (14,12.875) [circle, draw, minimum size=1.75cm] {$h_9$};
+\node (c9) at (14,10.5) [circle, draw, minimum size=1.75cm] {$c_9$};
+\draw [dashed] (5.25,12.875) -- (h9.west);
+\draw [dashed] (5.25,10.5) -- (c9.west);
+\draw (h9.east) -- (16.25,12.875);
+\draw (c9.east) -- (16.25,10.5);
+\node (x10) at (19.75,16.5) [circle, draw, minimum size=1.5cm] {$x_{10}$};
+
+\draw (x10.south) -- (19.75,14);
+
+\node (h10) at (26.5,12.75) [circle, draw, minimum size=1.75cm] {$h_{10}$};
+\node (c10) at (26.625,10.5) [circle, draw, minimum size=1.75cm] {$c_{10}$};
+
+\draw (24,12.75) -- (h10.west);
+\draw (24,10.5) -- (c10.west);
+\draw (h10.east) -- (28.75,12.75);
+\draw (c10.east) -- (28.75,10.5);
+
+\draw (-1.5,4.875) rectangle (4.5,0.375) node[pos=.5, align=center] {Output Layer\\(Linear $W_{oh}$)};
+\draw (9.25,4.75) rectangle (14.375,1.0) node[pos=.5] {Softmax Layer};
+\draw (20.375,4.5) rectangle (25.25,1.375) node[pos=.5, align=center] {Class \\ probabilities};
+
+\draw (1.125,7.75) -- (1.125,4.875);
+\draw (4.5,2.625) -- (9.25,2.625);
+\draw (14.375,2.625) -- (20.375,2.625);
+
+\end{circuitikz}
+\caption{LSTM Architecture}
+\label{fig:my_label}
+\end{figure}
+
+\subsubsection{Normalisation and Data preparation}
+
+The input are normalised z-score of the original numbers. The output is directly feed into the loss function as nn.CrossEntropy can accept classes as input.
+
+\subsubsection{Training}
+The training dataset, validation dataset and test dataset are divided in ratio of 8:1:1. The training dataset then divided into batches of size 64. The optimiser used is $torch.optim.AdamW(learning_rate = 0.001)$ and it is trained for 100 epochs.
+
+\begin{figure}[H]
+	\includegraphics[width = 0.5\textwidth]{LSTM1.png}
+	\includegraphics[width = 0.5\textwidth]{LSTM2.png}
+	\caption{(Left)loss over the epochs (Right) validation accuracy over epochs}
+	\label{fig:my_label}
+\end{figure}
+As you can see,it saturates over 68.8\% validation accuracy. Well, there are few were metric apart from this.
+
+\subsubsection{Evaluation}
+\begin{enumerate}
+	\item Test Accuracy (\%): 68.81
+	\item Full sequence correct (\%): 4.3
+	\item Atmost 1 incorect sequence correct (\%): 16.1
+	\item Atmost 2 incorect sequence correct (\%): 36.3
+	\item Average no of rank predicted incorect in a sequence : 3.119
+\end{enumerate}
+A few testcases are here:
+\begin{enumerate}
+	\item 5 testcase
+
+		x :  [[ 0.6226948   1.2467268  -1.2360291  -0.3133532  -1.151339    0.9926566
+  -0.2999811   0.28393456  1.1397498  -1.2850602 ]]
+
+		pred :  [6 9 1 4 2 7 4 6 8 1]
+
+		true :  tensor([6, 9, 1, 3, 2, 7, 4, 5, 8, 0])
+	\item 10 testcase
+
+		x :  [[-0.6788334  -0.05816858 -0.00419773 -1.5153817   1.1711676  -1.6053331
+   0.44256103  1.2641174   0.4125772   0.57149136]]
+
+		pred :  [2 3 3 1 8 0 4 9 6 7]
+
+		true :  tensor([2, 3, 4, 1, 8, 0, 6, 9, 5, 7])
+	\item 15 testcase
+
+		x :  [[-0.68435204  0.42710373  0.9828316   0.86630803 -1.8719964   1.2427689
+  -0.19584931  0.6063708  -1.0294411  -0.34374464]]
+
+		pred :  [2 5 7 7 0 9 4 7 1 4]
+
+		true :  tensor([2, 5, 8, 7, 0, 9, 4, 6, 1, 3])
+	\item 20 testcase
+
+		x :  [[-0.41699928  0.06130363  0.6541298  -1.9832729  -0.21153113  1.2705343
+  -0.8548822  -0.45068258  0.9269645   1.0044361 ]]
+
+		pred :  [2 5 6 0 4 9 1 3 8 7]
+
+		true :  tensor([3, 5, 6, 0, 4, 9, 1, 2, 7, 8])
+	\item 25 testcase
+
+		x :  [[-0.8204587   0.14929734  0.06359797 -0.621997   -1.4068229   1.7234596
+   0.05457698  1.6061867  -0.14839523 -0.59944457]]
+
+		pred :  [1 7 5 2 0 8 6 9 5 2]
+
+		true :  tensor([1, 7, 6, 2, 0, 9, 5, 8, 4, 3])
+	\item 30 testcase
+
+		x :  [[-0.0518996  -0.7828802   1.5197088  -0.46855855 -0.96562535 -0.63668406
+   1.9656069   0.08698671 -0.79384494  0.12719063]]
+
+		pred :  [5 2 9 4 0 3 9 7 1 6]
+
+		true :  tensor([5, 2, 8, 4, 0, 3, 9, 6, 1, 7])
+	\item 35 testcase
+
+		x :  [[ 0.5403877   0.02626885  1.2458938  -1.0882808  -0.5441404  -0.439065
+  -1.2158724  -0.9344204   0.86687195  1.5423566 ]]
+
+		pred :  [6 5 8 1 3 4 1 2 8 9]
+
+		true :  tensor([6, 5, 8, 1, 3, 4, 0, 2, 7, 9])
+	\item 40 testcase
+
+		x :  [[ 0.5949918  -0.5577821   1.379316   -1.0976888  -0.550486   -0.52859795
+   0.6387681   0.9926259  -1.6339476   0.7628007 ]]
+
+pred :  [6 2 9 1 3 4 6 8 0 6]
+
+true :  tensor([5, 2, 9, 1, 3, 4, 6, 8, 0, 7])
+\item 45 testcase
+
+	x :  [[-0.2971111  -1.9077842   0.17868957  0.3020453   0.7672726   0.24917856
+   1.4510158   0.93644613 -1.0689654  -0.6107871 ]]
+
+pred :  [3 0 4 6 8 5 8 8 1 2]
+
+true :  tensor([3, 0, 4, 6, 7, 5, 9, 8, 1, 2])
+\item 50 testcase
+
+	x :  [[-0.5694185   0.02958956  0.10897616 -1.464322    1.4657654   1.4765909
+   0.48786676 -0.15444301 -1.3885438   0.00793867]]
+
+pred :  [2 5 5 0 9 9 6 4 1 5]
+
+true :  tensor([2, 5, 6, 0, 8, 9, 7, 3, 1, 4])
+\end{enumerate}
+
+Well we see that the model seemed to have learnt as it has predicted some of the rank correctly. The model is able to predict very well. but well it is easy to catch that is doesn't do well with numbers with lesser difference. For number which are close it repeats itself. 
+
+\textbf{Listing all the drawbacks:}
+
+- invalid seq output but better than previous.
+
+- repeating the ranks for the values nearly same values
+
+- forget far values
+
+- computational heavy
+
+
+\textbf{Good aspects:}
+
+- better accuracy and better understanding of the problem 
+
+- better memory
+
+- can scaled for bigger sequences
+
+\section{Implementing Encoder-Only Transformer}
+Well, This is the best of all the model - Encoder-Only Transformer.
+
+The first implemention will be very identical to the paper but with slight variation.
+
+The output layer helps here to rank the entire seq.
+
+\subsection{Architecture}
+\begin{figure}[!ht]
+\centering
+\begin{circuitikz}[scale=0.35, transform shape]
+\tikzstyle{every node}=[font=\fontsize{18.2pt}{23.7pt}\selectfont]
+
+\node (x) at (0, 6) [circle, draw, minimum size=1.8cm] {$x$};
+\node (pos) at (0, 0) [rectangle, draw, minimum size=1.8cm, align=center] {Positional\\Encoding};
+
+\node (join1) at (3, 3) [circle, fill, inner sep=2pt] {};
+\draw (x.east) -- (3, 6) -- (join1.center);
+\draw (pos.east) -- (3, 0) -- (join1.center);
+
+\node (split) at (6.5, 3) [circle, fill, inner sep=2pt] {};
+\draw (join1.center) -- (split);
+
+\draw (9, 0) rectangle (13, 6) node[pos=.5, align=center] {Multi-Head\\Attention};
+\node (mha_in) at (9, 3) {};
+\node (mha_out) at (13, 3) {};
+
+\draw (split) -- (mha_in);
+
+\node (join2) at (15.5, 3) [circle, fill, inner sep=2pt] {};
+\draw (split) -- (6.5, 8.5) -- (15.5, 8.5) -- (join2.center);
+\draw (mha_out) -- (join2.center);
+
+\draw (17, 0) rectangle (22, 6) node[pos=.5, align=center] {Layer\\Normalisation};
+\node (norm_in) at (17, 3) {};
+\node (norm_out) at (22, 3) {};
+
+\draw (join2.center) -- (norm_in);
+
+\draw (23.5, -1) rectangle (27.5, 7) node[pos=.5, align=center] {Feed\\Forward\\Net};
+\node (ff_in) at (23.5, 3) {};
+\node (ff_out) at (27.5, 3) {};
+
+\draw (norm_out) -- (ff_in);
+
+\node (out) at (30.5, 3) [circle, draw, minimum size=1.8cm] {Output};
+\draw (ff_out) -- (out.west);
+
+\end{circuitikz}
+\caption{Transformer Architecture}
+\label{fig:my_label}
+\end{figure}
+
+\subsubsection{Normalisation and Data preparation}
+
+The input are normalised z-score of the original numbers. In the embedding, the normalised z-score is provided itself. The output is directly feed into the loss function as nn.CrossEntropy can accept classes as input.
+
+\subsubsection{Positional Encoding}
+Well, as the embedding dimension is one, the positional encoding suggested by the paper will not work here. So, I used another system of encoding:
+
+$$P_{pos} = (1.5)^{-pos}$$
+
+\textbf{Note: any constant greater than 1 works.}
+
+It has great properties: it is unique for every position; stays in (0,1]; and $1.5^(-9)$ is 0.026 which not negligible; can easily understood by the transformer. 
+
+\subsection{Training}
+The training dataset, validation dataset and test dataset are divided in ratio of 8:1:1. The training dataset then divided into batches of size 64. The optimiser used is $torch.optim.AdamW(learning_rate = 0.001)$ and it is trained for 200 epochs.
+
+\begin{figure}[H]
+	\includegraphics[width = 0.5\textwidth]{LSTM1.png}
+	\includegraphics[width = 0.5\textwidth]{LSTM2.png}
+	\caption{(Left)loss over the epochs (Right) validation accuracy over epochs}
+	\label{fig:my_label}
+\end{figure}
+As you can see,it saturates over 74.8\% validation accuracy. Well, there are few were metric apart from this.
+
+\subsubsection{Evaluation}
+\begin{enumerate}
+	\item Test Accuracy (\%): 73.79
+	\item Full sequence correct (\%): 6
+	\item Atmost 1 incorect sequence correct (\%): 20.3
+	\item Atmost 2 incorect sequence correct (\%): 46.5
+	\item Average no of rank predicted incorect in a sequence : 2.621
+\end{enumerate}
+A few testcases are here:
+\begin{enumerate}
+	\item 5 testcase
+
+		x :  -1.0139829   0.9693663  -1.2405518  -0.87804157  1.7884998   0.54411393
+  -0.9721548   0.33497342  0.05960507  0.4081726
+
+		pred :  2 8 0 2 9 7 2 6 5 6
+
+		true :  1, 8, 0, 3, 9, 7, 2, 5, 4, 6
+
+
+
+	\item 10 testcase
+
+		x :  [[ 0.50953513  0.2765529   0.79395497  0.82118666  0.4883549   0.87565
+  -1.8414671  -0.3285957   0.09198257 -1.6871543 ]]
+
+		pred :  [5 4 8 8 5 9 0 2 4 1]
+
+		true :  tensor([6, 4, 7, 8, 5, 9, 0, 2, 3, 1])
+	\item 15 testcase
+
+		x :  [[-0.9339631  -0.78526545  1.1655067  -0.20463634 -0.08426202  1.0132686
+  -1.479188    1.0876174   1.0274303  -0.80650795]]
+
+		pred :  [2 2 9 4 4 7 0 8 7 2]
+
+		true :  tensor([1, 3, 9, 4, 5, 6, 0, 8, 7, 2])
+	\item 20 testcase
+
+		x :  [[ 1.863396    0.3594803  -1.1000161  -1.0080044   0.64503396 -0.94454795
+   0.9876983  -0.11326961 -0.9096469   0.21987629]]
+
+		pred :  [9 6 0 1 7 2 8 5 2 6]
+
+		true :  tensor([9, 6, 0, 1, 7, 2, 8, 4, 3, 5])
+	\item 25 testcase
+
+		x :  [[-0.66240436  0.81871426  0.7476643  -1.3783693  -1.6571039   0.73126817
+  -0.74438506  0.5181182   0.8679027   0.75859505]]
+
+		pred :  [2 8 6 1 0 6 2 5 9 7]
+
+		true :  tensor([3, 8, 6, 1, 0, 5, 2, 4, 9, 7])
+	\item 30 testcase
+
+		x :  [[ 0.19609028 -1.9665515  -0.29615283  0.16381204 -0.19528334 -0.46964836
+   0.5592205   0.769029    1.8543847  -0.61490035]]
+
+		pred :  [5 0 3 5 3 2 7 8 9 1]
+
+		true :  tensor([6, 0, 3, 5, 4, 2, 7, 8, 9, 1])
+	\item 35 testcase
+
+		x :  [[-1.5127878  -0.39488912  2.0393066  -0.11636829 -0.20030607 -0.23845962
+  -0.25372103 -0.41778123 -0.30332065  1.3983272 ]]
+
+		pred :  [0 3 9 5 4 4 4 3 4 8]
+
+		true :  tensor([0, 2, 9, 7, 6, 5, 4, 1, 3, 8])
+	\item 40 testcase
+
+		x :  [[ 0.08240458 -1.2603298   1.2494543   1.6050069   0.01965998 -1.0930109
+  -0.8211177   0.62200814 -0.8838623   0.47978705]]
+
+pred :  [5 0 8 9 5 1 2 6 2 6]
+
+true :  tensor([5, 0, 8, 9, 4, 1, 3, 7, 2, 6])
+
+\item 45 testcase
+
+	x :  [[-1.1409974   1.6209114  -1.004196   -1.0633534   0.7372485   0.84447116
+   0.20113498  0.9221152  -0.84151334 -0.27582115]]
+
+pred :  [0 9 2 1 7 7 5 7 2 4]
+
+true :  tensor([0, 9, 2, 1, 6, 7, 5, 8, 3, 4])
+
+\item 50 testcase
+
+	x :  [[ 1.2786505   0.5309186  -0.14752549  1.1429617  -0.39292017  0.41255176
+  -1.1435392  -1.3802729   0.89179313 -1.1926181 ]]
+
+pred :  [9 6 4 8 3 5 1 0 7 1]
+
+true :  tensor([9, 6, 4, 8, 3, 5, 2, 0, 7, 1])
+
+\end{enumerate}
+
+Well we see that the model seemed to have learnt as it has predicted some of the rank correctly. The model is able to predict very well. but well it is easy to catch that is doesn't do well with numbers with lesser difference. For number which are close it repeats itself. 
+
+\textbf{Listing all the drawbacks:}
+
+- invalid seq output but better than previous.
+
+- repeating the ranks for the values nearly same values
+
+\textbf{Good aspects:}
+
+
+- computational friendly
+
+- better accuracy and better understanding of the problem 
+
+- self-attention is much better than the other approaches
+
+- can scaled for bigger sequences by increasing output tokens
+
+- the difference in the values where it predicts the same value is order of $10^{-2}$ which is smaller than others.
+
+\section{Experiments and Ablation Studies}
+
+These are included in the inferenceAndExperiment.ipynb.
+
+\section{Source codes}
+
+Each model can be found in its respective named directory and the notebooks are in the main directory only.
+
+../models and training.ipynb : the testing and running different models 
+
+Source code for the report is in the "report" folder.
+\end{document}
