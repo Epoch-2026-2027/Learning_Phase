@@ -6,7 +6,7 @@ I have also chosen this sub-task for performing my ablations and analysing the m
 ## LLM usage
 I have commented next to LLM-generated code lines specifically in the source files. LLMs were used to understand concepts like  An LLM was used to generate the diagrams given below. 
 
-## Methodolgy
+## Methodology
 I decided to make three baselines-
     1. MLP-based model
     2. Vanilla Uni-Directional model
@@ -66,7 +66,7 @@ We can interpret these results well already.
 
 Let's dive a little deeper into some specifics.
 ### Training Convergence
-Owing to the order of complexities, MLP < Vanilla RNN < biLSTM is the order in which they converge to the lowest validation loss. Though we can note how Vanilla RNN and biLSTMs being more complex, have a tendancy to overfit much faster, as they converge first. They are trickier to train and suitable dropout was essential.
+Owing to the order of complexities, MLP < Vanilla RNN < biLSTM is the order in which they converge to the lowest validation loss. Though we can note how Vanilla RNN and biLSTMs being more complex, have a tendency to overfit much faster, as they converge first. They are trickier to train and suitable dropout was essential.
 
 ### Validation Loss
 MLPs, as highlighted earlier, are unable to gauge the order of elements in the sequence. Vanilla RNNs are not good at retaining important information in their hidden states and also suffer in terms of validation performance. Only a bidirectional-LSTM is able to overcome both issues, with the added advantage that it's able to compare elements from both ends of the sequence. (Although a bidirectional-GRU could have also been used.)  
@@ -80,13 +80,13 @@ Observe some testing examples from each of the models.
 &emsp;&emsp;&emsp;&emsp;Sequence   --> [ 42, 954,  20, 706, 244, 717, 279, 440, 350, 439]  
 &emsp;&emsp;&emsp;&emsp;Predicted-->   [0, 7, 0, 7, 2, 7, 3, 5, 4, 5]   
 &emsp;&emsp;&emsp;&emsp;Actual   -->   &emsp;[1, 9, 0, 7, 2, 8, 3, 6, 4, 5]  
-`Number of matches = 6`, The model does a decent job - it gets 5/10 of the ranks right. But it repeats ranks - notices how it directly assigns lower ranks to smaller numbers, and higher ranks for much larger numbers? `rank 0` for `42` and `20`, while it gives rank 7 for `954`, `706`, `717`? Simply because it doesn't see the numbers as a sequence, but as an indpendent collection. It's almost vaguely ranking the numbers into ranks based on all 1000 numbers in the vocabulary!  
+`Number of matches = 6`, The model does a decent job - it gets 5/10 of the ranks right. But it repeats ranks - notices how it directly assigns lower ranks to smaller numbers, and higher ranks for much larger numbers? `rank 0` for `42` and `20`, while it gives rank 7 for `954`, `706`, `717`? Simply because it doesn't see the numbers as a sequence, but as an independent collection. It's almost vaguely ranking the numbers into ranks based on all 1000 numbers in the vocabulary!  
 
 2. Vanilla RNN Model  
 &emsp;&emsp;&emsp;&emsp;Sequence   --> [ 24, 969, 186,  25, 551, 613, 792, 247, 262, 856]  
 &emsp;&emsp;&emsp;&emsp;Predicted-->   [0, 9, 1, 3, 5, 5, 8, 6, 4, 6]  
 &emsp;&emsp;&emsp;&emsp;Actual   -->   &emsp;[0, 9, 2, 1, 5, 6, 7, 3, 4, 8]  
-`Number of matches = 4`, Again it is doing something similar to what the MLP model did - repeating ranks, and <i>attempting</i> broad statistics, like `rank 0` for `24`, `rank 8` for 792, `rank 9` for 969, but it also gets confused because of the partial sequential data it remembers, like how it gives `rank 4` and `rank 6` for `262` and `856` - Neither capturing global stastics in the vocabulary like the MLP, neither capturing global sequence information, thus performing even worse than the MLP model!  
+`Number of matches = 4`, Again it is doing something similar to what the MLP model did - repeating ranks, and <i>attempting</i> broad statistics, like `rank 0` for `24`, `rank 8` for 792, `rank 9` for 969, but it also gets confused because of the partial sequential data it remembers, like how it gives `rank 4` and `rank 6` for `262` and `856` - Neither capturing global statistics in the vocabulary like the MLP, neither capturing global sequence information, thus performing even worse than the MLP model!  
 
 3. biLSTM Model  
 &emsp;&emsp;&emsp;&emsp;Sequence   --> [524, 825,  88, 616, 266, 641, 380, 992,  11, 163]   
@@ -143,12 +143,12 @@ Moving onto the main model of importance - a Transformer Encoder, a model that u
 Let us first look at its training and performance on the 10-elements long sequence data set.
 Given below is the loss history...  
 <img width="300" height="250" alt="10_bert_loss" src="https://github.com/user-attachments/assets/505b2e15-0885-44a3-924b-d1f51898e5e8" />  
-With a `Testing loss of 0.903` and an `Average match of 8.586`. It is a much slower to converge model, and requires much for regularisation than the others due to its complexity relative to the sub-task. Nonetheless, it generalises better than even the biLSTM. Infact, it is even able to perfectly predict a significant number of sequences in inference. For example,  
+With a `Testing loss of 0.903` and an `Average match of 8.586`. It is a much slower to converge model, and requires much more regularisation than the others due to its complexity relative to the sub-task. Nonetheless, it generalises better than even the biLSTM. Infact, it is even able to perfectly predict a significant number of sequences in inference. For example,  
 &emsp;&emsp;&emsp;&emsp;Sequence   --> [511, 896,  95, 259, 304, 440, 782, 708, 156, 661]    
 &emsp;&emsp;&emsp;&emsp;Predicted-->   [5, 9, 0, 2, 3, 4, 8, 7, 1, 6]    
 &emsp;&emsp;&emsp;&emsp;Actual   -->   &emsp;[5, 9, 0, 2, 3, 4, 8, 7, 1, 6]  
 
-It is able to do this because of the bidirectional Self-Attention mechanism baked into it. It is able to attend to every other taken with respect to a token, and compare everything globally. 
+It is able to do this because of the bidirectional Self-Attention mechanism baked into it. It is able to attend to every other token with respect to a token, and compare everything globally. 
 
 Further, it is just as good at smaller sequence lengths.  
 | Metric | seq=4 | seq=6 | seq=8 | seq=10 |
@@ -202,9 +202,9 @@ We will be exploring three normalisation strategies-
   </tr>
 </table>  
 
-* <b>Training stability</b> - No normalisation offers rough descent, plateauing chaotically. Z-Normalisation offers the highest training stability of the four options. Global Min-Max scaling offers the worst performance - the model loses all informaation as very tiny values get compressed even more. Sequence-wise Min-Max scaling has a mostly smooth descent, placing it close to the best.  
+* <b>Training stability</b> - No normalisation offers rough descent, plateauing chaotically. Z-Normalisation offers the highest training stability of the four options. Global Min-Max scaling offers the worst performance - the model loses all information as very tiny values get compressed even more. Sequence-wise Min-Max scaling has a mostly smooth descent, placing it close to the best.  
   
-* <b>Convergence</b> - No normalisation has chaotic convergence, it gets stuck in a locak gradient and starts over-fitting. Sequence-wise Min-Max scaling and Z-normalisation offer superior results, while Global Min-Max scaling leads to chaos and no proper convergence.  
+* <b>Convergence</b> - No normalisation has chaotic convergence, it gets stuck in a local gradient and starts over-fitting. Sequence-wise Min-Max scaling and Z-normalisation offer superior results, while Global Min-Max scaling leads to chaos and no proper convergence.  
   
 * <b>Out-of-distribution performance</b> - Upon testing with an example, `[1, 2, 3, 4, 5, 6]`  
   No normalisation ---> `[4, 1, 4, 4, 2, 2]`  
@@ -220,7 +220,7 @@ We will be exploring three normalisation strategies-
   It <i>can</i> be argued that Z-Normalisation and Sequence-wise Min-Max scaling are much better than the other options, as they do seem to rank outliers somewhat   well.  
 
 #### Categorical Embeddings vs Continuous Representations  
-We will be exploring three normalisation strategies-  
+We will be exploring three representation strategies-  
     1. Raw float inputs  
     2. Normalised float inputs (Z-normalisation)  
     3. Embedded inputs  
@@ -240,7 +240,7 @@ We will be exploring three normalisation strategies-
 * <b>Training stability and Convergence</b> - Raw float inputs offer rough descent, and plateaus chaotically. Normalised inputs offer the highest training stability of the three options. Embedded inputs offers the worst performance - smooth descent initially but overfits after hitting a local gradient. This can be because the inputs just don't have enough high dimensional information needed to be represented effectively by embeddings.  
   
 ### Ablation-B : Architecture & Attention  
-####Summarising Baselines vs Transformer  
+#### Summarising Baselines vs Transformer  
 * <b>Sequential processing</b> — Vanilla RNN / LSTM process tokens one at a time, naturally suited for short sequences. But as sequence length grows, both struggle — the LSTM hits a ceiling of 6.057/10 matches at seq=10, while the Transformer reaches 8.586/10. This is a consequence of information getting compressed into hidden states and/or cell states. Attention mitigates this.  
   
 * <b>Long-range reasoning</b> — Vanilla RNNs degrade over long sequences due to vanishing gradients; LSTMs mitigate this with having Input/Output/Forget/Cell_state gates, but still fall short. The BERT" model's bidirectional self-attention attends to all tokens simultaneously, giving it a clear edge as sequence length increases.  
@@ -274,9 +274,10 @@ The testing statistics are as follows...
 | 2 | 0.940 | 3.534 |
 | 3 | 0.891 | 3.849 |
 | 4 | 0.872 | 3.833 |  
-`N=3` performs the best. Note we can account for the low Avg Matches (<3.85/6) simply because the task is below the model's capacity. It achieved a much higher match accuracy when `seq_len=10`. 
-
-For reference, here are the attentiom visualisations for the various N values, for the input `[305, 142, 822, 572, 293, 263]`.  
+  
+`N=3` performs the best. Note we can account for the low Avg Matches (<3.85/6) simply because the task is below the model's capacity. It achieved a much higher match accuracy when `seq_len=10`.  
+  
+For reference, here are the attention visualisations for the various N values, for the input `[305, 142, 822, 572, 293, 263]`.  
   
 * N=1  (Prediction -> `[3, 0, 4, 4, 2, 2]`)  
 <img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/adea9aa1-9804-4d9d-ba0b-e1803ecd8dce" />  
@@ -296,23 +297,20 @@ For reference, here are the attentiom visualisations for the various N values, f
 <img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/d262d607-b20b-4e1e-bcfe-8873b2ad74f9" />
 <img width="180" height="180" alt="image" src="https://github.com/user-attachments/assets/d827e562-fd00-427c-b806-adab64ba4332" />  
   
-r
+* Expressiveness here can be gauged by how many repititions in the ranks the model is making. `N=3` is not only the most accurate, it is the most expressive of the four!  
 
-
-
-
-
-
-
-
-
-  
+   
 ### Positional Encoding Ablation  
-For this ablations, I will be using the "BERT" baseline with `batch_size=512`, `BERTModel(N=3, h=2, dmodel=10, dk=5, dv=5, vocab_size=1000, seq_len=10)`, and an optimizer `AdamW(lr=1e-3,weight_decay=1e-3,betas=(0.9,0.99)))`
+For this ablations, I will be using the "BERT" baseline with `batch_size=512`, `BERTModel(N=3, h=2, dmodel=10, dk=5, dv=5, vocab_size=1000, seq_len=10)`, and an optimizer `AdamW(lr=1e-3,weight_decay=1e-3,betas=(0.9,0.99)))` 
+The Positional Encoding call in `models.py` was commented to observe the effects of its absence. Unexpectedly, the model's effectiveness did not diminish. The exact same testing loss and accuracy was observed. The only conclusion that can be drawn from this is that while global position information of the tokens were not provided, the model already learnt to look at the relative positions between pairs and sort them. The task problem seems to have favoured this approach, evident from the pair-wise conclusion from the attention visualisations.
 
 
+## Conclusion
 
-
-
-
-
+This sub-task explored four architectures for the task of sorted relative rank prediction — MLP, Vanilla RNN, biLSTM, and a Transformer Encoder.  
+  
+The MLP, while stable and efficient, treats inputs as an unordered collection and fails to capture sequential relationships, leading to repeated rank assignments. The Vanilla RNN improves on this by processing tokens sequentially, but suffers from information loss over longer sequences. The biLSTM addresses this with its gating mechanism and bidirectional processing, achieving the best baseline performance at 6.057/10 average matches.  
+  
+The Transformer Encoder outperforms all baselines at 8.586/10 average matches, owing to its self-attention mechanism which enables global pairwise comparisons across the entire sequence simultaneously. Attention visualisations confirm that the model has learned meaningful structure — attending to rank-adjacent elements, identifying extremes, etc.  
+  
+Ablation studies reveal the most proficient of embedding and normalisation approaches. Information about types of weight initialisations, optimizers were observed. Positional encodings in the context of this task seem to not carry much weight. Architecturally, the Transformer scales better with sequence length than any of the baselines, making it the clear choice for tasks requiring global sequence understanding.
