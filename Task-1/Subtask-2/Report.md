@@ -123,12 +123,16 @@ Using the `bertviz` library, it is easy to visualise the various ways in which t
 <i>More can be visualised and observed in the inference notebook!</i>  
 For the time being, can draw some conclusions from the attention visualisations of some of the layer heads. Note that the encoder input tokens are on the right, and the decoder output tokens are on the left.  
 * A significant number of heads seem to not be performing any operations on the inputs. It's a sign of redundancy.
-* Look at this head...
-<img width="364" height="623" alt="image" src="https://github.com/user-attachments/assets/671599ba-233a-448e-a3de-c40d855879b5" />  <img width="363" height="622" alt="image" src="https://github.com/user-attachments/assets/9c6b7b6c-f560-4793-81aa-2a3caf752126" /> <img width="360" height="621" alt="image" src="https://github.com/user-attachments/assets/4334881a-d307-44cc-af55-fb68dba8a1f6" />
-
-
-
-this head has learnt to attend to the presence of all other methods 
+* Look at this head...  
+<table>
+  <tr>
+    <td><img width="250" height="475" alt="image" src="https://github.com/user-attachments/assets/671599ba-233a-448e-a3de-c40d855879b5" /></td>
+    <td><img width="250" height="475" alt="image" src="https://github.com/user-attachments/assets/9c6b7b6c-f560-4793-81aa-2a3caf752126" /></td>
+    <td><img width="250" height="475" alt="image" src="https://github.com/user-attachments/assets/4334881a-d307-44cc-af55-fb68dba8a1f6" /></td>
+  </tr>
+</table>
+It has learnt to perform a superclass initialisation of `METHOD_1`! The `METHOD_1`s and `.` are attending to the one in the encoder sequence.
+* <img width="250" height="475" alt="image" src="https://github.com/user-attachments/assets/ff1b4a97-90d0-4f6b-9537-d61650a5af46" />  
 
 
 ## Conclusion
