@@ -316,8 +316,6 @@ The "BERT" model is inherently very complicated with multiple layers. Even with 
 * He/Kaiming (Normal) Initialisation `torch.utils.init.kaiming_normal_()` - Fill the weights with values using a Kaiming normal distribution.  
 &emsp;&emsp; $$\text{std} = \sqrt{\frac{2}{(1 + \text{negative slope}^2) \times fan_{in}}}$$  
 * Orthogonal Initialisation `torch.utils.init.orthogonal_()` - Fill the weights with a (semi) orthogonal matrix.  
-  
-* Any other kind of initialisation mitigates the exploding gradients that mess with the training as seen in Gaussian initialisation!
 
 The loss history for them are as below...  
 <table>
@@ -341,7 +339,8 @@ The loss history for them are as below...
     <td><img width="300" height="250" alt="Henorm_6_bert_loss" src="https://github.com/user-attachments/assets/aa60687c-1be0-43d5-837a-1ab38b792225" /></td>
     <td><img width="300" height="250" alt="Ortho_6_bert_loss" src="https://github.com/user-attachments/assets/e7f1badf-084c-4095-b2e4-521aebc18563" /></td>
   </tr>
-</table>
+</table>  
+Any other kind of initialisation mitigates the exploding gradients that mess with the training as seen in Gaussian initialisation!
 
 ## Conclusion
 
