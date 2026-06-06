@@ -147,7 +147,7 @@ def train(model, tr_dataloader, val_dataloader, epochs, patience=10, optim=None)
 
         if val_loss<best_loss:
             best_loss = val_loss
-            dest = f'.\\New Models\\Ortho_{seq_len}_{model.tag}_model.pth' if not enableNormalisation else f'.\\New Models\\norm{enableNormalisation}_{seq_len}_{model.tag}_model.pth'
+            dest = f'.\\New Models\\{seq_len}_{model.tag}_model.pth' if not enableNormalisation else f'.\\New Models\\norm{enableNormalisation}_{seq_len}_{model.tag}_model.pth'
             # New Models destination to avoid over-writing any of the existing trained models...
             torch.save(model.state_dict(), dest)
 
@@ -226,10 +226,9 @@ epochs, loss_history, val_loss_history = train(model, training_data_loader, vali
 print("\nTraining complete!")
 
 # # Recording training loss / validation loss graph
-plt.plot(np.arange(1, epochs+1),loss_history, color='b', label='training loss')
-plt.plot(np.arange(1, epochs+1),val_loss_history, color='r', label='validation loss')
-plt.xlabel('Epochs')
-plt.ylabel('Loss History')
-plt.legend()
-plt.savefig(f'.\\Ablation data\\Ablations B\\Ortho_{seq_len}_{model.tag}_loss.png')
-    
+# plt.plot(np.arange(1, epochs+1),loss_history, color='b', label='training loss')
+# plt.plot(np.arange(1, epochs+1),val_loss_history, color='r', label='validation loss')
+# plt.xlabel('Epochs')
+# plt.ylabel('Loss History')
+# plt.legend()
+# plt.savefig(f'.\\Ablation data\\{seq_len}_{model.tag}_loss.png')
