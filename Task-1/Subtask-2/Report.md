@@ -20,7 +20,11 @@ Given below are diagrams of the architectures used.
 <img width="450" height="400" alt="transformer_arch" src="https://github.com/user-attachments/assets/76c821c0-4609-4c12-a9f4-980b3c3c5917" />  
   
   
-The dataset used is [CodeXGLUE Code Refinement](https://huggingface.co/datasets/google/code_x_glue_cc_code_refinement) (small split). It contains pairs of buggy and fixed Java code, with identifiers anonymized as `METHOD_1`, `VAR_1`, etc. A word-level tokenizer was used, splitting on whitespace and `.` as delimiters, though `.` delimiters were added back in for two reasons.
+The dataset used is [CodeXGLUE Code Refinement](https://huggingface.co/datasets/google/code_x_glue_cc_code_refinement) (small split). It contains pairs of buggy and fixed Java code, with identifiers anonymized as `METHOD_1`, `VAR_1`, etc. 
+
+<b>Tokenization Strategies</b>
+Earlier, a character tokenized model was used, which is deprecated now.
+Alternative, word-level tokenizer was used, splitting on whitespace and `.` as delimiters, though `.` delimiters were added back in for two reasons.
 1. Ease of detokenization
 2. Expectation that the `.` tokens would help the model attend to methods and attributes better
 
