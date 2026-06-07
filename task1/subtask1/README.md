@@ -1,6 +1,6 @@
-# Report: MLP Model for Ranking a 10-Length Array
-
-## 1) Objective
+# Report
+## MLP Model for Ranking a 10-Length Array
+### 1) Objective
 Build and train a Multi-Layer Perceptron (MLP) that predicts the rank position of each element in an input array of length 10.
 
 - **Input (`X`)**: 10 numeric values.
@@ -14,7 +14,7 @@ where output scores are converted to a ranking using double `argsort`.
 
 ---
 
-## 2) Data Pipeline
+### 2) Data Pipeline
 
 From `ranking_dataset.csv`:
 - Features: `data.iloc[:, 0:10]`
@@ -29,7 +29,7 @@ Split and loaders:
 
 ---
 
-## 3) Model Architecture
+### 3) Model Architecture
 
 Implemented as `MLP(torch.nn.Module)` with `Sequential` layers:
 
@@ -51,7 +51,7 @@ Device selection:
 
 ---
 
-## 4) Training Setup
+### 4) Training Setup
 
 Training function: `train(model, train_dataloader, valid_dataloader, epochs=10)`
 
@@ -66,21 +66,21 @@ A plot is generated for train vs validation loss over epochs.
 
 ---
 
-## 5) Testing and Ranking Conversion
+### 5) Testing and Ranking Conversion
 
-### Test loss
+#### Test loss
 Model is evaluated on test split using MSE:
 
 - `Test Loss = mean batch MSE over test loader`
 
-### Ranking extraction
+#### Ranking extraction
 Predicted scores are converted to rank indices with:
 
 `torch.argsort(torch.argsort(model_output, dim=1), dim=1)`
 
 This yields per-sample rank assignments for 10 positions.
 
-### Accuracy metric used
+#### Accuracy metric used
 For each sample:
 
 - Compare predicted ranks to true ranks elementwise
@@ -89,7 +89,7 @@ For each sample:
 
 ---
 
-## 6) Qualitative Example Output
+### 6) Qualitative Example Output
 
 Notebook prints one random test sample with:
 
@@ -104,7 +104,114 @@ This helps visually verify whether the model learns ordering behavior.
 
 ---
 
-## 7) Summary
+### 7) Summary
 
 The notebook implements a complete supervised learning pipeline for ranking 10-element arrays using an MLP. The model is simple, fast to train, and evaluated using both regression loss (MSE) and ranking-match accuracy. The approach is appropriate for small fixed-length ranking tasks and can be improved further with rank-specific losses (e.g., pairwise/listwise objectives) if higher ranking fidelity is needed.
 
+### 8) Results
+The MLP model acheives an approximately 70% accuracy in predicting correct ranks for individual datapoints, and on average is able to completely correctly sort about 16% of the test samples. The training and validation loss curves show steady convergence, indicating effective learning. The qualitative example demonstrates that the model captures general ordering trends, though some misrankings occur, especially for closely valued inputs.
+
+
+
+# RNN Model for Ranking a 10-Length Array
+
+### 1) Objective
+Build and train a Multi-Layer Perceptron (MLP) that predicts the rank position of each element in an input array of length 10.
+
+- **Input (`X`)**: 20 numeric values. This is just the first 10 unsorted values, and the next 10 are the target ranks for those values.
+
+---
+
+### 2) Data Pipeline
+
+From `ranking_dataset.csv`:
+- Features: `data.iloc[:, :]`
+
+Custom dataset:
+- `RankingDataset(Dataset)` converts features/labels to `torch.float32` tensors.
+We get a tensor of shape `(20, 1)` where the first 10 values are the input and the next 10 values are the target ranks.
+
+Split and loaders:
+- Dataset split: **60% train, 20% test, 20% validation**
+- `DataLoader(..., batch_size=32, shuffle=True)` for each split.
+
+---
+
+### 3) Model Architecture
+
+Implemented as `RNN(torch.nn.Module)` with a `RNN` layers followed by a `Linear` layer:
+
+1. `RNN(1, 128), 10`
+2. `ReLU`
+3. `Linear(128, 10)`
+
+Notes:
+- Hidden dimension: 128
+- Final layer outputs 10 continuous values used as ranking scores.
+
+Device selection:
+- CUDA if available, else CPU.
+
+---
+
+### 4) Training Setup
+
+Training function: `train(model, train_dataloader, valid_dataloader, epochs=10)`
+
+- Optimizer: **Adam** (`lr=0.001`)
+- Loss: **MSELoss** between predicted score vector and target rank vector
+- Tracks:
+	- average training loss per epoch
+	- average validation loss per epoch
+- In notebook run: `epochs=60`
+
+A plot is generated for train vs validation loss over epochs.
+
+> This is an interesting plot, since there are two elbows found in the training curve, one at around 3 epochs and another at around 20 epochs. This suggests that the model learns quickly in the first 3 epochs, then plateaus for a while, and then learns again after 20 epochs. This could be due to the model finding a local minimum in the loss landscape and then escaping it after some time. It would be interesting to investigate this further by looking at the loss landscape and the gradients during training.
+![Training and Validation Loss Curves](./figs/rnn_training.png)
+---
+
+### 5) Testing and Ranking Conversion
+
+#### Test loss
+Model is evaluated on test split using MSE:
+
+- `Test Loss = mean batch MSE over test loader`
+
+#### Ranking extraction
+Predicted scores are converted to rank indices with:
+
+`torch.argsort(torch.argsort(model_output, dim=1), dim=1)`
+
+This yields per-sample rank assignments for 10 positions.
+
+#### Accuracy metric used
+For each sample:
+
+- Compare predicted ranks to true ranks elementwise
+- Compute mean match ratio over 10 positions
+- Aggregate into a histogram and report average accuracy.
+
+---
+
+### 6) Qualitative Example Output
+
+Notebook prints one random test sample with:
+
+- raw input array
+- predicted ranking scores
+- true ranking labels
+- predicted ranks after argsort processing
+- input sorted by true ranking
+- input sorted by predicted ranking
+
+This helps visually verify whether the model learns ordering behavior.
+
+---
+
+### 7) Summary
+
+The notebook implements an RNN model for ranking 10-element arrays using a sequence model. The model is trained using MSE loss and evaluated using both regression loss and ranking-match accuracy. The training curve shows interesting behavior with two distinct learning phases, suggesting the model may be navigating a complex loss landscape. The qualitative example demonstrates that the model captures ordering trends effectively, with some misrankings occurring for closely valued inputs. Overall, the RNN architecture appears to be well-suited for this ranking task, achieving high accuracy in predicting correct ranks for individual datapoints and completely correctly sorting a large portion of test samples.
+
+### 8) Results
+The RNN model acheives a **99.34%** accuracy in predicting correct ranks for individual datapoints, and on average is able to completely correctly sort about **96%** of the test samples.
