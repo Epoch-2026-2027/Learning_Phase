@@ -118,8 +118,8 @@ The MLP model acheives an approximately 70% accuracy in predicting correct ranks
 ### 1) Objective
 Build and train a Multi-Layer Perceptron (MLP) that predicts the rank position of each element in an input array of length 10.
 
-- **Input (`X`)**: 20 numeric values. This is just the first 10 unsorted values, and the next 10 are the target ranks for those values.
-
+- **Input (`X`)**: 21 numeric values. This is just the first 10 unsorted values, a -1, and the next 10 are the target ranks for those values.
+Originally I concatenated the input and target into a single tensor of shape (20, 1) for each sample, but I found that this was not working well with the RNN architecture. The RNN was not able to learn the correct mapping from the input to the target ranks, and the training loss was not decreasing. To address this issue, I added a token (-1) to separate the input and target in the sequence. This way, the RNN can learn to focus on the input values first and then predict the target ranks after processing the entire sequence. This change only slightly improved the model. (From ~9.3% to 10.2% accuracy)
 ---
 
 ### 2) Data Pipeline
@@ -141,7 +141,7 @@ Split and loaders:
 
 Implemented as `RNN(torch.nn.Module)` with a `RNN` layers followed by a `Linear` layer:
 
-1. `RNN(1, 128), 10`
+1. `RNN(1, 128), 5`
 2. `ReLU`
 3. `Linear(128, 10)`
 
@@ -214,4 +214,4 @@ This helps visually verify whether the model learns ordering behavior.
 The notebook implements an RNN model for ranking 10-element arrays using a sequence model. The model is trained using MSE loss and evaluated using both regression loss and ranking-match accuracy. The training curve shows interesting behavior with two distinct learning phases, suggesting the model may be navigating a complex loss landscape. The qualitative example demonstrates that the model captures ordering trends effectively, with some misrankings occurring for closely valued inputs. Overall, the RNN architecture appears to be well-suited for this ranking task, achieving high accuracy in predicting correct ranks for individual datapoints and completely correctly sorting a large portion of test samples.
 
 ### 8) Results
-The RNN model acheives a **99.34%** accuracy in predicting correct ranks for individual datapoints, and on average is able to completely correctly sort about **96%** of the test samples.
+The RNN model acheives an approximately 10% accuracy in predicting correct ranks for individual datapoints, which is a significant drop from the MLP's 70% accuracy. This is probably due to the fact that in an MLP, the model simultaneously performs calculations on all 10 input values, while in an RNN, the model processes the input sequentially. This means that the RNN has to learn to remember the previous inputs and their corresponding ranks in order to make accurate predictions, which can be more challenging than the MLP's approach. The training and validation loss curves show steady convergence, indicating effective learning, but the final accuracy is much lower than the MLP. The qualitative example demonstrates that the RNN captures general ordering trends, but it struggles with closely valued inputs, leading to more misrankings compared to the MLP.
