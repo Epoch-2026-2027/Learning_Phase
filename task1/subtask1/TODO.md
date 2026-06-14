@@ -1,0 +1,1 @@
+1. Create an LSTM baseline, because it is a common model for retaining long-term dependencies in sequential data.
