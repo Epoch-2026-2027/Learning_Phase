@@ -1,9 +1,10 @@
 # Generative Modeling on CIFAR-10 — Diffusion Models
 
 **Epoch — The AI/ML Club, IIT Hyderabad**
+
 **Track:** Diffusion Models
-**Author:** Swayam
-**Group:** Aneesh, Naveen, Divyansh, Swayam, Nikhil
+
+**Author:** Swayam Verma
 
 ---
 
