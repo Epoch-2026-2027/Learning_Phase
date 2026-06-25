@@ -27,15 +27,13 @@ To further visualize the data, I decided to focus on two metrics in each image -
 
 Clearly, we can see that images with (on average) narrow roads and density dominate the dataset. The issue is that depending on how training is conducted, this can lead to the model learning almost nothing, or not being able to generalize precisely.
 
-Let's also observe some qualitative aspects of the dataset, 
-(finish later)
-(Mention used dataset, mention the secondary source, explain the computational complexity of 1024x1024 and 6.3k data samples and the switch to 1.5k 256x256 data points, data exploration about density and road width, conclusion about class imbalance, qualitative analysis of labelling quality)
-
 ## <u>Methodology</u>
 The original DeepGlobe dataset was first sliced to procure 1,500 datapoints, which were then downscaled to 256x256 images of satellite-mask pairs. A first run went through and calculated the mean and standard deviation of all the images for RGB channels. Using the acquired mean and standard deviation, the images were Z-Normalized, before being saved as NumPy binary files (`.npy`).
 The entire pre-processing script, and the ensuing dataloader script, were both implemented lazily to conserve precious computing resources.  
 
-*<i>The original Kaggle dataset was processed by a python script into a folder named "CV_Data", with "sats" and "masks" folders.</i>
+*<i>The original Kaggle dataset was processed by a python script `organize.py` into a folder named "CV_Data", with "sats" and "masks" folders.</i>
+
+*<i>The pretrained checkpoints were to big to upload, so I've included them in a google drive folder - https://drive.google.com/drive/folders/1otdFdcYK9oZs7lsLK6fSDCsWNtmNv7Tj?usp=sharing</i>
 
 The baseline model was then established - <u>a classical U-Net model</u>. To compare potential improvements with it, the following models were chosen-
 1. <u>U-Net with ResNet backbone </u>
@@ -63,11 +61,6 @@ For all the models, I will be using the same training hyper-parameters-
 During inference, a suitable threshold is used to first convert the model predictions into binary masks, which is then tested using two metrics:-
 1. <u>Dice-Sørensen coefficient</u>
 2. <u>IoU Score</u>
-		
-	IoU score = 
-
-(Mention steps taken in pre-processing and training and inference. Mention models considered and why, mention some things about the implementation, mention loss function used - focal loss - in all the models for the main purpose and the justification over other ones while also noting this is one type of experimentation)
-(Mention baseline hyper-parameters like max. no of epochs, lr, optimizer and weight decay, threshold used to evaluate all models, etc)
 
 ## <u>Baseline Model</u>
 #### <u>Classical U-Net Architecture (with Skip Connections)</u>
@@ -87,7 +80,6 @@ Average IoU score = 0.1789 | Average Dice score = 0.2874
 	<img src="subtask1 report images/classicunet_model_predictions.png" alt="classicunet_model_predictions" style="width:60%; height:auto;">
 </p>
 
-(Baseline model abstract, architecture, paper-comparison, performance, short comings)
 
 ## <u>Model Improvements</u>
 #### **<u>1. Attention U-Net</u>**
