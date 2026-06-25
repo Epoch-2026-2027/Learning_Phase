@@ -1,7 +1,6 @@
 # Road Segmentation from Satellite Imagery
 
-**Epoch — The AI/ML Club of IIT Hyderabad**
-*Learning Phase Assignment — Task 2 (Semantic Segmentation)*
+**Epoch Learning Phase Assignment — Task 2 (Semantic Segmentation)**
 
 This repository contains my submission for the Epoch Learning Phase assignment on **semantic segmentation of roads in satellite imagery**. The assignment brief asked for a baseline segmentation model, followed by architectural and loss-function experiments, with all findings documented in a report. This repo implements that full pipeline: U-Net, Attention U-Net, and DeepLabV3+ as architectures, and BCE, BCE+Dice, and Focal Loss as loss functions, evaluated on the Massachusetts Roads Dataset.
 
