@@ -33,7 +33,9 @@ Let's also observe some qualitative aspects of the dataset,
 
 ## <u>Methodology</u>
 The original DeepGlobe dataset was first sliced to procure 1,500 datapoints, which were then downscaled to 256x256 images of satellite-mask pairs. A first run went through and calculated the mean and standard deviation of all the images for RGB channels. Using the acquired mean and standard deviation, the images were Z-Normalized, before being saved as NumPy binary files (`.npy`).
-The entire pre-processing script, and the ensuing dataloader script, were both implemented lazily to conserve precious computing resources.
+The entire pre-processing script, and the ensuing dataloader script, were both implemented lazily to conserve precious computing resources.  
+
+*<i>The original Kaggle dataset was processed by a python script into a folder named "CV_Data", with "sats" and "masks" folders.</i>
 
 The baseline model was then established - <u>a classical U-Net model</u>. To compare potential improvements with it, the following models were chosen-
 1. <u>U-Net with ResNet backbone </u>
