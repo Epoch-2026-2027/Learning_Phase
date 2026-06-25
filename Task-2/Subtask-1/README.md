@@ -1,6 +1,6 @@
 # Road Segmentation from Satellite Imagery
 
-**Epoch Learning Phase Assignment — Task 2 (Semantic Segmentation)**
+**Epoch Learning Phase Assignment — Task 2 (Road Segmentation)**
 
 This repository contains my submission for the Epoch Learning Phase assignment on **semantic segmentation of roads in satellite imagery**. The assignment brief asked for a baseline segmentation model, followed by architectural and loss-function experiments, with all findings documented in a report. This repo implements that full pipeline: U-Net, Attention U-Net, and DeepLabV3+ as architectures, and BCE, BCE+Dice, and Focal Loss as loss functions, evaluated on the Massachusetts Roads Dataset.
 
@@ -196,9 +196,3 @@ Metrics are computed from shared TP/FP/FN/TN counts (no metric inconsistency):
 - Chen, L.-C. et al. (2018). [Encoder-Decoder with Atrous Separable Convolution for Semantic Image Segmentation (DeepLabV3+)](https://arxiv.org/abs/1802.02611). ECCV.
 - Lin, T.-Y. et al. (2017). [Focal Loss for Dense Object Detection](https://arxiv.org/abs/1708.02002). ICCV.
 - Milletari, F., Navab, N., & Ahmadi, S.-A. (2016). [V-Net: Fully Convolutional Neural Networks for Volumetric Medical Image Segmentation](https://arxiv.org/abs/1606.04797) (Dice Loss).
-
----
-
-## Submission
-
-Submitted as the Task 2 deliverable for the **Epoch AI/ML Club, IIT Hyderabad** — Learning Phase.
