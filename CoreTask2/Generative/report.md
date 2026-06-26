@@ -64,9 +64,8 @@ SN constrains the spectral norm of each weight matrix to $\leq 1$ via power iter
 | DCGAN | 30.61 |
 | WGAN-GP | 29.97 |
 | DCGAN + SN | 38.30 |
+
 DCGAN and WGAN-GP are close (30.61 vs 29.97), the Wasserstein loss gives no clear quality advantage at this scale. DCGAN+SN at 38.30 is trained for 60 epochs vs 30 for the other two so the comparison isnt direct but scores dont vary too much.
-
-
 
 ![](./outputs/dcgan.png)
 

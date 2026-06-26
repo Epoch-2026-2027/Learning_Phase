@@ -50,9 +50,10 @@ Uses torchvision's pretrained DeepLabV3, replacing the final classifier head wit
 ## 6. Results
 
 
-All models trained with BCEDiceLoss, Adam, lr=1e-4, 20 epochs, batch size 4, 512x512 crops.
+All models trained with BCEDiceLoss, Adam, lr=1e-4, 20 epochs, 512x512 crops.
 
 | Model | IoU | Dice |
 |-------|-----|------|
 | UNet (scratch) | 0.6002 | 0.7235 |
 | ResUNet (pretrained) | 0.5963 | 0.7161 |
+| DeepLabV3 (pretrained) | 0.5894 | 0.7148 |
