@@ -15,11 +15,13 @@ I have tried there different variant of GAN, mainly DCGAN.
 ## Finetuning 
 
 First, I have tried to finetune a pretrained gan. It worked good enough but had severe issues:
-I) The original dataset had a small range of colours and thus model stuck to the small palatee.
-II) The model though converged very quickly, it converged to a small subset of images.
-III) The model took mainly epochs and increasing the learning rate would lead to same image.
-IV) The batch size also effect the model performance.
-V) The generator was not able to keep up with the discriminator showing that the gradient made very small increaments.
+<ul>
+<li> The original dataset had a small range of colours and thus model stuck to the small palatee.
+<li> The model though converged very quickly, it converged to a small subset of images.
+<li> The model took mainly epochs and increasing the learning rate would lead to same image.
+<li> The batch size also effect the model performance.
+<li> The generator was not able to keep up with the discriminator showing that the gradient made very small increaments.
+</ul>
 
 ![Alt text](figs/finetuned-1.png)
 
@@ -33,9 +35,10 @@ I tried to make the generator better by changing the normalisation technique and
 
 ## Finetuning on a subset of images (cats)
 This introduced more artifacts like:
-i) Though the images were of some like cats there was a lot of errors
-ii) not much detailed
-
+<ul>
+<li> Though the images were of some like cats there was a lot of errors
+<li> not much detailed
+</ul>
 This may be due to lack of data.
 ![Alt text](figs/finetuned-3.png)
 
@@ -43,20 +46,23 @@ This may be due to lack of data.
 ## Training Specialised GAN for The dataset
 
 Training specialised GAN improved performance alot:
-i) more variety of images are generated
-ii) lesser training time as the model is smaller
-iii) more detailed images
-iv) The difference in choice of normalisation of image is not very much
-
+<ul>
+<li> more variety of images are generated
+<li> lesser training time as the model is smaller
+<li> more detailed images
+<li> The difference in choice of normalisation of image is not very much
+</ul>
 
 ![Alt text](figs/trained-1.png)
 ![Alt text](figs/trained-2.png)
 
 
 But still similar problem exist like:
-i) generator is not performing as well as the disriminator
-ii) generator is not able to surpass the discriminator
-iii) though detailed but some don't belong to a particular task
+<ul>
+<li> generator is not performing as well as the disriminator
+<li> generator is not able to surpass the discriminator
+<li> though detailed but some don't belong to a particular task
+</ul>
 
 ## Spectral normallisation
 
