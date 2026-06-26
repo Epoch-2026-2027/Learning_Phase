@@ -4,7 +4,8 @@ This report contains my attempts at implementing fine-tuning of Denoising Diffus
 ## 2. Working Principle
 Diffusion models are essentially adjustable Markov chains, trained to predict the augmented noise over a clean image, thus letting them gradually "clean" noise from an image. This lets them "generate" images (or audio) from random noise, in several timesteps. This iterative nature of the paradigm lends itself the high-quality generation it is known for.
 
-![Diffusion process overview](images/Pasted%20image%2020260626115327.png)
+<img width="886" height="148" alt="Pasted image 20260626202652" src="https://github.com/user-attachments/assets/3d6c835d-0450-4937-9d7d-75108249a261" />
+
 
 They're named after the physical process of diffusion — since the forward process iteratively destroys the input image until it is random noise, which is similar to the tendency of gas molecules to move around or "diffuse", destroying their order.
 
