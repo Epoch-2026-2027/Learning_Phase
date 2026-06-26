@@ -1,6 +1,8 @@
 ## 1. Abstract
 This report contains my attempts at implementing fine-tuning of Denoising Diffusion Probabilistic Models (DDPM), and the experiments and ablations conducted. This will be done through the `diffusers` library from huggingface for weight fetching and fine-tuning.
 
+*<i>Note, all saved checkpoints and pre-processed data files were too big, and Git LFS wasn't working well, so I've once again appended them to a google drive folder, https://drive.google.com/drive/folders/1hFJwBQdKoXvgsaWrha8GkjXCEkk5UQXf?usp=sharing</i>
+
 ## 2. Working Principle
 Diffusion models are essentially adjustable Markov chains, trained to predict the augmented noise over a clean image, thus letting them gradually "clean" noise from an image. This lets them "generate" images (or audio) from random noise, in several timesteps. This iterative nature of the paradigm lends itself the high-quality generation it is known for.
 
