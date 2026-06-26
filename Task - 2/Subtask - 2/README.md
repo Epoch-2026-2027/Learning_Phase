@@ -21,7 +21,7 @@ III) The model took mainly epochs and increasing the learning rate would lead to
 IV) The batch size also effect the model performance.
 V) The generator was not able to keep up with the discriminator showing that the gradient made very small increaments.
 
-![Alt text](figs/finetuned-01.png)
+![Alt text](figs/finetuned-1.png)
 
 As you can see the images, not very different but detailed. (Note the images seemed to share the same colour pallate as the original generator was trained for a small range of colours.)
 
@@ -29,7 +29,7 @@ Moreover the images are of similar group.
 
 I tried to make the generator better by changing the normalisation technique and it solved some but introduced new, like the discriminator not able to perform better as it was pretrained for \[-1,1\].
 
-![Alt text](figs/finetuned-02.png)
+![Alt text](figs/finetuned-2.png)
 
 ## Finetuning on a subset of images (cats)
 This introduced more artifacts like:
@@ -37,7 +37,7 @@ i) Though the images were of some like cats there was a lot of errors
 ii) not much detailed
 
 This may be due to lack of data.
-![Alt text](figs/finetuned-02.png)
+![Alt text](figs/finetuned-3.png)
 
 
 ## Training Specialised GAN for The dataset
@@ -49,8 +49,8 @@ iii) more detailed images
 iv) The difference in choice of normalisation of image is not very much
 
 
-![Alt text](figs/trained-01.png)
-![Alt text](figs/trained-02.png)
+![Alt text](figs/trained-1.png)
+![Alt text](figs/trained-2.png)
 
 
 But still similar problem exist like:
