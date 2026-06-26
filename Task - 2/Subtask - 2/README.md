@@ -40,8 +40,10 @@ This introduced more artifacts like:
 <li> not much detailed
 </ul>
 This may be due to lack of data.
+
 ![Alt text](figs/finetuned-3.png)
 
+But it less variety of creatures produced meaningful results
 
 ## Training Specialised GAN for The dataset
 
