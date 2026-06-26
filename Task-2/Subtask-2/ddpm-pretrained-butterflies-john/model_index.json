@@ -1,0 +1,13 @@
+{
+  "_class_name": "DDPMPipeline",
+  "_diffusers_version": "0.38.0",
+  "_name_or_path": "johnowhitaker/ddpm-butterflies-32px",
+  "scheduler": [
+    "diffusers",
+    "DDPMScheduler"
+  ],
+  "unet": [
+    "diffusers",
+    "UNet2DModel"
+  ]
+}
