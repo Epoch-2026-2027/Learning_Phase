@@ -1,0 +1,121 @@
+﻿Subtask 2
+Generative Modeling on CIFAR-10
+Overview
+In this assignment, you will explore generative computer vision models by fine-tuning and analyzing modern image generation architectures.
+You will be divided into groups, with each group assigned one of the following model families:
+* Variational Autoencoders (VAEs)
+* Generative Adversarial Networks (GANs)
+* Diffusion Models
+Dataset
+* GAN and Diffusion Groups: CIFAR-10 (10 object categories including airplane, automobile, bird, etc.). You may train on the full dataset, selected classes, or custom subsets.
+* VAE Groups: To properly explore latent space manipulation (image editing/morphing), you will use a face or attribute-based dataset instead of CIFAR-10. Suggested datasets include dSprites, a subset of CelebA (downscaled to 64x64), or the Anime Faces dataset.
+Groups
+(the grouping is only for assignment of the models, the tasks should be done individually still)
+Variational Autoencoders (VAE)
+* Tanmay
+* Vivaan
+* Saummya
+* Alisha
+* Aman
+Generative Adversarial Networks (GAN)
+* Utkarsh
+* Abhishek
+* Pranav
+* Tilak
+* Srijan
+Diffusion Models
+* Aneesh
+* Naveen
+* Divyansh
+* Swayam
+* Nikhil
+Model Initialization Requirement
+For this assignment, you are not required to train a generative model entirely from scratch.
+Instead, each group should begin with a publicly available pretrained implementation corresponding to their assigned model family.
+Your task is to:
+1. Obtain pretrained weights from a reputable source.
+2. Re-implement or wrap the model architecture within your own PyTorch codebase.
+3. Load the pretrained weights into your implementation.
+4. Fine-tune the model on the assigned dataset.
+5. Conduct experiments and analysis on the resulting model.
+Suggested Workflow
+Data Exploration
+Analyze:
+* class distribution,
+* image characteristics,
+* intra-class variation,
+* preprocessing choices.
+Visualize samples and understand the dataset before training.
+Baseline Generation
+Obtain a working pretrained baseline model for your assigned paradigm.
+Examples:
+* Convolutional VAE
+* DCGAN
+* DDPM
+Train and generate initial samples.
+Model Improvements
+Possible directions include:
+VAE Groups
+* latent dimension studies,
+* β-VAE,
+* deeper encoders,
+* different reconstruction losses,
+* Latent Space Interpolation.
+GAN Groups
+* DCGAN variants,
+* WGAN,
+* spectral normalization,
+* discriminator architecture changes.
+Diffusion Groups
+* different noise schedules,
+* timestep sampling,
+* U-Net variations,
+* Inference speed improvements.
+Analysis
+Investigate:
+* image quality,
+* diversity,
+* failure cases,
+* training stability,
+* mode collapse (GANs),
+* latent space behavior (VAEs),
+* sampling quality (Diffusion).
+Ablations and Experiments
+Possible experimentation axes:
+Data
+* augmentations
+* class-specific training
+* dataset size
+Architecture
+* latent dimension
+* network depth
+* normalization methods
+* attention blocks
+Optimization
+* learning rates
+* schedulers
+* batch sizes
+Generation
+* sampling strategies
+* temperature effects
+* diffusion inference steps
+Deliverables
+1. Source Code
+* training code,
+* generation scripts,
+* evaluation scripts,
+* model implementation,
+* An easy to use demonstration, preferably in a jupyter notebook
+2. Experimental Report
+* architecture description,
+* experiments conducted,
+* ablation studies,
+* generated samples,
+* analysis of model behavior,
+Bonus Ideas
+Possible extensions:
+* class-conditional generation,
+* attention-based generators,
+* latent space arithmetic,
+* hybrid generative models,
+* comparison across model families.
